@@ -188,8 +188,13 @@ import BilibiliJS from './bilibiliAnimation/bilibili.js'
 onMounted(async () => {
 
     // 我测试axios是否成功
-    const res = await getUserListService();
-    console.log(res);
+    try {
+        const res = await getUserListService();
+        console.log(res);
+    } catch (error) {
+        console.log(error);
+    }
+
 
 
 

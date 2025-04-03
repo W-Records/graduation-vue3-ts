@@ -4,10 +4,14 @@ import HomeView from '../views/HomeView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'home',
+    //   component: HomeView,
+    // },
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      redirect: '/login', // 添加重定向规则
     },
     {
       path: '/login',
@@ -18,6 +22,25 @@ const router = createRouter({
       path: '/user',
       name: 'user',
       component: () => import('../views/userHomePage/UserHomeView.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/adminPage/AdminHomeView.vue'),
+      children: [
+        {
+          path: 'PersonnelManagement',
+          name: 'PersonnelManagement',
+          component: () =>
+            import('../views/adminPage/personnelManagement/PersonnelManagementView.vue'),
+        },
+        // 可以继续添加其他子路由
+        {
+          path: 'HouseManagement',
+          name: 'HouseManagement',
+          component: () => import('../views/adminPage/houseManagement/HouseManagementView.vue'),
+        },
+      ],
     },
     {
       path: '/about',

@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 
+import { loginService } from '@/api/UserApi.ts'
+
 const router = useRouter()
 
 const loading = ref(false)
@@ -11,7 +13,8 @@ const loginFormRef = ref()
 
 const formData = reactive({
     username: '',
-    password: ''
+    password: '',
+    resource: '',
 })
 
 const validateUsername = (_rule: any, value: string, callback: any) => {
@@ -47,7 +50,7 @@ const handleLogin = async () => {
         if (valid) {
             loading.value = true
             try {
-                // 这里替换为真实的登录接口调用
+                // 这里替换为真实的登录接口调用 loginService
                 // const response = await loginAPI(formData)
                 // if (response.success) {
                 //   // 存储 token 到 Pinia 或 localStorage
@@ -56,9 +59,27 @@ const handleLogin = async () => {
                 //   ElMessage.error('登录失败，请检查账号密码')
                 // }
 
-                // 演示用模拟成功跳转
-                ElMessage.success('登录成功！')
-                await router.push('/user')
+                try {
+                    const response: any = await loginService(formData)
+                    console.log(response)
+                    localStorage.setItem('token', response.access_token)
+
+                    // 演示用模拟成功跳转
+                    if (formData.resource == "user") {
+                        ElMessage.success('普通用户_登录成功！')
+                        await router.push('/user')
+                    }
+                    if (formData.resource == "admin") {
+                        ElMessage.success('管理员_登录成功！')
+                        await router.push('/admin')
+                    }
+                } catch (error: any) {
+                    console.log(error.response.data.message)
+                    ElMessage.error(error.response.data.message)
+                }
+
+
+
             } catch (error) {
                 ElMessage.error('登录失败，请检查账号密码')
             } finally {
@@ -100,6 +121,13 @@ const handleLogin = async () => {
                             </el-icon>
                         </template>
                     </el-input>
+                </el-form-item>
+
+                <el-form-item label="">
+                    <el-radio-group v-model="formData.resource">
+                        <el-radio value="user">普通用户</el-radio>
+                        <el-radio value="admin">管理员</el-radio>
+                    </el-radio-group>
                 </el-form-item>
 
                 <el-form-item>
