@@ -1,62 +1,97 @@
 <script setup lang="ts">
+import { onMounted, ref, reactive } from 'vue'
+import { getAllUserService } from '@/api/UserApi'
+import { ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 // 表格
 const handleClick = () => {
     console.log('click')
 }
 
-const tableData = [
-    {
-        date: '2016-05-03',
-        name: 'Tom',
-        state: 'California',
-        city: 'Los Angeles',
-        address: 'No. 189, Grove St, Los Angeles',
-        zip: 'CA 90036',
-        tag: 'Home',
-    },
-    {
-        date: '2016-05-02',
-        name: 'Tom',
-        state: 'California',
-        city: 'Los Angeles',
-        address: 'No. 189, Grove St, Los Angeles',
-        zip: 'CA 90036',
-        tag: 'Office',
-    },
-    {
-        date: '2016-05-04',
-        name: 'Tom',
-        state: 'California',
-        city: 'Los Angeles',
-        address: 'No. 189, Grove St, Los Angeles',
-        zip: 'CA 90036',
-        tag: 'Home',
-    },
-    {
-        date: '2016-05-01',
-        name: 'Tom',
-        state: 'California',
-        city: 'Los Angeles',
-        address: 'No. 189, Grove St, Los Angeles',
-        zip: 'CA 90036',
-        tag: 'Office',
-    },
-]
+const tableData = ref([]);
+
+
+
+
+
+
+
+
+const distributtionHouse = (id: any) => {
+    router.push({ name: 'distributionHouse', params: { id } })
+}
+
+
+
+
+
+
+
+
+
+onMounted(async () => {
+    try {
+        const response: any = await getAllUserService();
+        // console.log(response);
+
+        tableData.value = response.map((user: any) => {
+            let hasHouse = "";
+            let hasCarport = "";
+
+            // console.log(user.carport_msgs);
+            if (user.carport_msgs.length > 0) {
+                user.carport_msgs.forEach((element: any) => {
+                    hasCarport = element.name + " " + hasCarport;
+                });
+            }
+            else {
+                hasCarport = "无车位";
+            }
+            // console.log(user.house_msgs);
+            if (user.house_msgs.length > 0) {
+                user.house_msgs.forEach((element: any) => {
+                    hasHouse = element.name + " " + hasHouse;
+                });
+            }
+            else {
+                hasHouse = "无房屋";
+            }
+
+
+
+
+
+            return {
+                ...user,
+                hasHouse,
+                hasCarport,
+                isDrawerOpen: false // 每行独立的抽屉状态
+            }
+        });
+
+        console.log(tableData.value);
+
+    } catch (error) {
+        console.error('获取房屋数据失败', error)
+    }
+})
 </script>
 
 <template>
     <div class="admin-body-main-table">
         <div class="admin-body-main-table-content">
             <el-table :data="tableData" style="width: 100%">
-                <el-table-column fixed prop="date" label="用户编号" width="150" />
-                <el-table-column prop="name" label="用户名" width="180" />
-                <el-table-column prop="state" label="手机号" width="180" />
-                <el-table-column prop="city" label="房屋" width="180" />
-                <el-table-column prop="address" label="车位" width="300" />
-                <el-table-column prop="zip" label="注册日期" width="600" />
+                <el-table-column fixed prop="id" label="用户编号" width="150" />
+                <el-table-column prop="username" label="用户名" width="180" />
+                <el-table-column prop="phone" label="手机号" width="180" />
+                <el-table-column prop="hasHouse" label="房屋" width="180" />
+                <el-table-column prop="hasCarport" label="车位" width="300" />
+                <el-table-column prop="createdAt" label="注册日期" width="600" />
                 <el-table-column fixed="right" label="Operations" min-width="200">
-                    <template #default>
-                        <el-button type="primary" size="small" @click="handleClick">
+                    <template #default="scope">
+                        <!-- @click="scope.row.isDrawerOpen = true" -->
+                        <el-button type="primary" size="small" @click="distributtionHouse(scope.row.id)">
                             分配房屋并授权
                         </el-button>
                         <el-button type="primary" size="small">修改</el-button>

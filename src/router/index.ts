@@ -40,6 +40,12 @@ const router = createRouter({
           name: 'HouseManagement',
           component: () => import('../views/adminPage/houseManagement/HouseManagementView.vue'),
         },
+        {
+          path: 'distributionHouse/:id',
+          name: 'distributionHouse',
+          component: () =>
+            import('../views/adminPage/buttonform/buttonHouse/distributionHouseView.vue'),
+        },
       ],
     },
     {
