@@ -9,3 +9,8 @@ export const getHouseListService = () => {
 export const addHouseService = (data: any) => {
   return axios.post('/house', data)
 }
+
+// 为用户分配房屋
+export const assignHouseService = (data: any) => {
+  return axios.post('/house/assignHouse', data)
+}

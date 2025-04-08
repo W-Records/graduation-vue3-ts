@@ -38,6 +38,10 @@ onMounted(async () => {
         tableData.value = response.map((user: any) => {
             let hasHouse = "";
             let hasCarport = "";
+            let authentication = "未授权";
+            if (user.roles == "user") {
+                authentication = "已授权";
+            }
 
             // console.log(user.carport_msgs);
             if (user.carport_msgs.length > 0) {
@@ -66,7 +70,8 @@ onMounted(async () => {
                 ...user,
                 hasHouse,
                 hasCarport,
-                isDrawerOpen: false // 每行独立的抽屉状态
+                isDrawerOpen: false, // 每行独立的抽屉状态
+                authentication
             }
         });
 
@@ -85,6 +90,7 @@ onMounted(async () => {
                 <el-table-column fixed prop="id" label="用户编号" width="150" />
                 <el-table-column prop="username" label="用户名" width="180" />
                 <el-table-column prop="phone" label="手机号" width="180" />
+                <el-table-column prop="authentication" label="是否社区内人员" width="180" />
                 <el-table-column prop="hasHouse" label="房屋" width="180" />
                 <el-table-column prop="hasCarport" label="车位" width="300" />
                 <el-table-column prop="createdAt" label="注册日期" width="600" />
