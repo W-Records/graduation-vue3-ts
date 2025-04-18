@@ -3,8 +3,8 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
-
-import { loginService } from '@/api/UserApi.ts'
+import { ElMessageBox } from 'element-plus'
+import { loginService, registerService } from '@/api/UserApi.ts'
 
 const router = useRouter()
 
@@ -88,6 +88,67 @@ const handleLogin = async () => {
         }
     })
 }
+
+
+// 抽屉
+const formLabelWidth = '80px'
+let timer: any
+
+const dialog = ref(false)
+const loading2 = ref(false)
+
+const form = reactive({
+    username: '',
+    password: '',
+    phone: '',
+})
+
+const onClick = async () => {
+    console.log(form)
+    loading2.value = true
+    await registerService(form)
+
+    loading2.value = false
+    dialog.value = false
+
+}
+
+const handleClose = (done: any) => {
+    if (loading2.value) {
+        return
+    }
+    ElMessageBox.confirm('Do you want to submit?')
+        .then(() => {
+            loading2.value = true
+            timer = setTimeout(() => {
+                done()
+                // 动画关闭需要一定的时间
+                setTimeout(() => {
+                    loading2.value = false
+                }, 400)
+            }, 2000)
+        })
+        .catch(() => {
+            // catch error
+        })
+}
+
+const cancelForm = () => {
+    loading2.value = false
+    dialog.value = false
+    clearTimeout(timer)
+}
+
+
+
+
+
+
+const handleRegister = () => {
+    console.log(formData)
+
+}
+
 </script>
 
 <template>
@@ -131,7 +192,33 @@ const handleLogin = async () => {
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button type="primary" style="width: 100%" :loading="loading" @click="handleLogin">登录</el-button>
+                    <div class="button-group">
+                        <el-button type="primary" style="width: 100%" :loading="loading" @click="handleLogin">登录</el-button>
+                        <el-button type="primary" style="width: 100%" :loading="loading"
+                            @click="dialog = true">注册</el-button>
+                        <el-drawer v-model="dialog" title="注册" :before-close="handleClose" direction="ltr"
+                            class="demo-drawer">
+                            <div class="demo-drawer__content">
+                                <el-form :model="form">
+                                    <el-form-item label="名称" :label-width="formLabelWidth">
+                                        <el-input v-model="form.username" autocomplete="off" />
+                                    </el-form-item>
+                                    <el-form-item label="密码" :label-width="formLabelWidth">
+                                        <el-input v-model="form.password" autocomplete="off" />
+                                    </el-form-item>
+                                    <el-form-item label="手机号码" :label-width="formLabelWidth">
+                                        <el-input v-model="form.phone" autocomplete="off" />
+                                    </el-form-item>
+                                </el-form>
+                                <div class="demo-drawer__footer">
+                                    <el-button @click="cancelForm">Cancel</el-button>
+                                    <el-button type="primary" :loading="loading" @click="onClick">
+                                        {{ loading ? 'Submitting ...' : 'Submit' }}
+                                    </el-button>
+                                </div>
+                            </div>
+                        </el-drawer>
+                    </div>
                 </el-form-item>
             </el-form>
         </el-card>
@@ -139,6 +226,13 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
+.button-group {
+    /* border: solid; */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .login-container {
     min-height: 100vh;
     display: flex;

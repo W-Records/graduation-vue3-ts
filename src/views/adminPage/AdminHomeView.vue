@@ -70,7 +70,36 @@ const handleLogout = () => {
                         </RouterLink>
                     </el-menu-item>
 
-                    <el-sub-menu index="1">
+                    <el-menu-item index="13">
+                        <RouterLink to="/admin/carManagement" style="text-decoration: none;color: inherit;">
+                            <el-icon><icon-menu /></el-icon>
+                            <span>车辆管理</span>
+                        </RouterLink>
+                    </el-menu-item>
+
+
+                    <el-menu-item index="14">
+                        <RouterLink to="/admin/BillManagement" style="text-decoration: none;color: inherit;">
+                            <el-icon><icon-menu /></el-icon>
+                            <span>用户账单</span>
+                        </RouterLink>
+                    </el-menu-item>
+
+                    <el-menu-item index="15">
+                        <RouterLink to="/admin/RepairManagement" style="text-decoration: none;color: inherit;">
+                            <el-icon><icon-menu /></el-icon>
+                            <span>用户报修</span>
+                        </RouterLink>
+                    </el-menu-item>
+
+                    <el-menu-item index="16">
+                        <RouterLink to="/admin/NoticeManagement" style="text-decoration: none;color: inherit;">
+                            <el-icon><icon-menu /></el-icon>
+                            <span>社区公告</span>
+                        </RouterLink>
+                    </el-menu-item>
+
+                    <!-- <el-sub-menu index="1">
                         <template #title>
                             <el-icon>
                                 <location />
@@ -104,7 +133,7 @@ const handleLogout = () => {
                             <setting />
                         </el-icon>
                         <span>Navigator Four</span>
-                    </el-menu-item>
+                    </el-menu-item> -->
                 </el-menu>
             </div>
             <div class="admin-body-main">

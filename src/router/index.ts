@@ -22,6 +22,38 @@ const router = createRouter({
       path: '/user',
       name: 'user',
       component: () => import('../views/userHomePage/UserHomeView.vue'),
+      children: [
+        {
+          path: 'AddRepair',
+          name: 'AddRepair',
+          component: () => import('../views/userHomePage/operateForm/AddRepairView.vue'),
+        },
+        {
+          path: 'BuyCarport',
+          name: 'BuyCarport',
+          component: () => import('../views/userHomePage/operateForm/BuyCarportView.vue'),
+        },
+        {
+          path: 'UserBill',
+          name: 'UserBill',
+          component: () => import('../views/userHomePage/operateForm/BillView.vue'),
+        },
+        {
+          path: 'editUser',
+          name: 'editUser',
+          component: () => import('../views/userHomePage/operateForm/EditUserView.vue'),
+        },
+        {
+          path: 'ShowCarport',
+          name: 'ShowCarport',
+          component: () => import('../views/userHomePage/showData/ShowCarportView.vue'),
+        },
+        {
+          path: 'ShowHouse',
+          name: 'ShowHouse',
+          component: () => import('../views/userHomePage/showData/ShowHouseView.vue'),
+        },
+      ],
     },
     {
       path: '/admin',
@@ -45,6 +77,26 @@ const router = createRouter({
           name: 'distributionHouse',
           component: () =>
             import('../views/adminPage/buttonform/buttonHouse/distributionHouseView.vue'),
+        },
+        {
+          path: 'carManagement',
+          name: 'carManagement',
+          component: () => import('../views/adminPage/carManagement/carManagementView.vue'),
+        },
+        {
+          path: 'BillManagement',
+          name: 'BillManagement',
+          component: () => import('../views/adminPage/billManagement/BillManagementView.vue'),
+        },
+        {
+          path: 'RepairManagement',
+          name: 'RepairManagement',
+          component: () => import('../views/adminPage/repairManagement/RepairManagementView.vue'),
+        },
+        {
+          path: 'NoticeManagement',
+          name: 'NoticeManagement',
+          component: () => import('../views/adminPage/noticeManagement/NoticeManagementView.vue'),
         },
       ],
     },

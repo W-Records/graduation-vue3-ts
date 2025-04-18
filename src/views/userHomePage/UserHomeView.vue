@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
@@ -174,12 +175,39 @@ const handleLogout = () => {
 }
 
 
+// 控制 main-content 显示与隐藏的变量
+import { provide } from 'vue';
+const showMainContent = ref(true)
+// 定义修改方法
+const setShowMainContent = (value: any) => {
+    showMainContent.value = value;
+};
+// 通过 provide 暴露给子组件
+provide('showMainContent', showMainContent);
+provide('setShowMainContent', setShowMainContent);
+
+
+
+
+
+
+// 当前用户信息
+const currentUser: any = ref({});
+// 社区公告信息
+const noticeList: any = ref([]);
+// 用户账单信息
+const billList: any = ref([]);
+// 用户报修信息
+const repairList: any = ref([]);
+
 
 
 
 // 导入 我测试axios是否成功
-import { getUserListService } from '@/api/UserApi.ts'
-
+import { getUserListService, getCurrentUserService } from '@/api/UserApi.ts'
+import { getNoticeListService } from '@/api/NoticeApi'
+import { getBillByUserIdService } from '@/api/BillApi'
+import { getUserRepairListService } from '@/api/RepairApi'
 
 
 // B站的头部鼠标跟随移动动画
@@ -189,8 +217,34 @@ onMounted(async () => {
 
     // 我测试axios是否成功
     try {
-        const res = await getUserListService();
+        // const res = await getUserListService();
+        // console.log(res);
+
+        const res: any = await getCurrentUserService();
         console.log(res);
+        currentUser.value = res[0];
+        console.log(currentUser.value);
+
+
+        // 获取公告信息
+        const noticeRes: any = await getNoticeListService();
+        noticeList.value = noticeRes;
+        console.log(noticeList.value);
+
+
+        // 查询用户的账单，状态为未缴费的账单
+        const billRes: any = await getBillByUserIdService(currentUser.value.id);
+        billList.value = billRes;
+        console.log(billList.value);
+
+
+
+        // 查询用户的报修信息
+        repairList.value = await getUserRepairListService(currentUser.value.id);
+        console.log(repairList.value);
+
+
+
     } catch (error) {
         console.log(error);
     }
@@ -224,7 +278,7 @@ onMounted(async () => {
             <div class="logo">社区管理系统 🐱‍🐉</div>
             <div class="user-info">
                 <el-dropdown trigger="click">
-                    <span class="user-name">欢迎您😀，{{ user.name }}</span>
+                    <span class="user-name">欢迎您😀，{{ currentUser.username }}</span>
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
@@ -236,221 +290,262 @@ onMounted(async () => {
 
         <!-- 主体内容 -->
         <el-main class="content">
-            <el-row :gutter="20">
-                <!-- 个人信息 -->
-                <el-col :span="6">
-                    <div class="my-card-container">
-                        <!-- <el-card shadow="hover" class="module-card"> -->
-                        <!-- <template #header> -->
-                        <div class="Mycard-header">个人信息 🐸</div>
-                        <!-- </template> -->
-                        <div class="Mycard-content">
-                            <div class="info-item Mycard-itemH">
-                                <span>姓名：</span>{{ user.name }}
-                            </div>
-                            <div class="info-item">
-                                <span>电话：</span>{{ user.phone }}
-                            </div>
-                            <!-- <div class="info-item">
+            <RouterView />
+            <div class="main-content" v-show="showMainContent">
+                <el-row :gutter="20">
+                    <!-- 个人信息 -->
+                    <el-col :span="6">
+                        <div class="my-card-container">
+                            <!-- <el-card shadow="hover" class="module-card"> -->
+                            <!-- <template #header> -->
+                            <div class="Mycard-header">个人信息 🐸</div>
+                            <!-- </template> -->
+                            <div class="Mycard-content">
+                                <div class="info-item Mycard-itemH">
+                                    <span>姓名：</span>{{ currentUser.username }}
+                                </div>
+                                <div class="info-item">
+                                    <span>电话：</span>{{ currentUser.phone }}
+                                </div>
+                                <!-- <div class="info-item">
                                 <span>地址：</span>{{ user.address }}
                             </div> -->
-                            <!-- <el-button type="primary" @click="$router.push('/profile')">查看/编辑</el-button> -->
-                            <!-- 个人信息 -->
-                            <!-- <el-button type="primary" plain @click="dialogUserInformation = true">查看/编辑</el-button> -->
-                            <el-drawer v-model="dialogUserInformation" title="个人信息 🐱‍🏍"
-                                :before-close="handleCloseUserInformation" direction="ltr" class="demo-drawer">
-                                <div class="demo-drawer__content">
-                                    <el-form :model="formUserInformation">
-                                        <el-form-item label="Name" :label-width="formLabelWidth">
-                                            <el-input v-model="formUserInformation.name" autocomplete="off" />
-                                        </el-form-item>
-                                        <el-form-item label="Area" :label-width="formLabelWidth">
-                                            <el-select v-model="formUserInformation.region"
-                                                placeholder="Please select activity area">
-                                                <el-option label="Area1" value="shanghai" />
-                                                <el-option label="Area2" value="beijing" />
-                                            </el-select>
-                                        </el-form-item>
-                                    </el-form>
-                                    <div class="demo-drawer__footer">
-                                        <el-button @click="cancelFormUserInformation">Cancel</el-button>
-                                        <el-button type="primary" :loading="loadingUserInformation"
-                                            @click="onClickUserInformation">
-                                            {{ loadingUserInformation ? 'Submitting ...' : 'Submit' }}
-                                        </el-button>
-                                    </div>
-                                </div>
-                            </el-drawer>
-                        </div>
-                        <!-- </el-card> -->
-                    </div>
-                </el-col>
-
-                <!-- 车位信息 -->
-                <el-col :span="6">
-                    <div class="my-card-container">
-                        <!-- <el-card shadow="hover" class="module-card"> -->
-                        <!-- <template #header> -->
-                        <div class="Mycard-header">车位信息</div>
-                        <!-- </template> -->
-                        <div class="Mycard-content">
-                            <div class="info-item Mycard-itemH">
-                                <span>当前车位：</span>{{ parkingInfo.status ? '已购买' : '未购买' }}
-                            </div>
-                            <div v-if="parkingInfo.status" class="info-item">
-                                <span>车位编号：</span>{{ parkingInfo.number }}
-                            </div>
-                            <!-- <el-button type="primary" @click="$router.push('/parking')">查看车位</el-button> -->
-
-                            <!-- <el-button text @click="table = true">Open Drawer with nested table</el-button> -->
-
-                        </div>
-                        <!-- </el-card> -->
-                    </div>
-                </el-col>
-
-
-
-                <!-- 缴费信息 -->
-                <el-col :span="6">
-                    <div class="my-card-container">
-                        <!-- <el-card shadow="hover" class="module-card"> -->
-                        <!-- <template #header> -->
-                        <div class="Mycard-header">缴费信息</div>
-                        <!-- </template> -->
-                        <div class="Mycard-content">
-                            <div class="info-item Mycard-itemH">
-                                <span>账户余额：</span>{{ user.balance }} 元
-                            </div>
-                            <div class="info-item">
-                                <span>待缴费用：</span>{{ user.dueFee }} 元
-                            </div>
-                            <!-- <el-button type="primary" @click="$router.push('/payment')">立即缴费</el-button> -->
-                        </div>
-                        <!-- </el-card> -->
-                    </div>
-                </el-col>
-
-                <!-- 设备报修 -->
-                <el-col :span="6">
-                    <div class="my-card-container">
-                        <!-- <el-card shadow="hover" class="module-card"> -->
-                        <!-- <template #header> -->
-                        <div class="Mycard-header">设备报修</div>
-                        <!-- </template> -->
-                        <div class="Mycard-content">
-                            <div class="info-item Mycard-itemH">
-                                <span>账户余额：</span>{{ user.balance }} 元
-                            </div>
-                            <div class="info-item">
-                                <span>待缴费用：</span>{{ user.dueFee }} 元
-                            </div>
-                            <!-- <el-button type="primary" @click="$router.push('/repair')">提交报修申请</el-button> -->
-                        </div>
-                        <!-- </el-card> -->
-                    </div>
-                </el-col>
-            </el-row>
-
-            <el-row :gutter="20">
-                <el-col :span="12">
-                    <div class="fourCard">
-                        <div class="fourCarditem swing">
-                            <div>
-                                <div>
-                                    <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
-                                </div>
-                                <div>新维修</div>
-                            </div>
-                        </div>
-                        <div class="fourCarditem swing">
-                            <div>
-                                <div>
-                                    <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
-                                </div>
-                                <div>买车位</div>
-                            </div>
-                        </div>
-                        <div class="fourCarditem swing">
-                            <div>
-                                <div>
-                                    <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
-                                </div>
-                                <div>看账单</div>
-                            </div>
-                        </div>
-                        <div class="fourCarditem swing">
-                            <div>
-                                <div>
-                                    <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
-                                </div>
-                                <div>改信息</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <el-card shadow="hover" class="notice-card">
-                            <template #header>
-                                <div class="card-header">我的维修</div>
-                            </template>
-                            <div class="">
-                                <el-table :data="tableData" height="187" style="width: 100%">
-                                    <el-table-column fixed prop="date" label="Date" width="150" />
-                                    <el-table-column prop="name" label="Name" width="120" />
-                                    <el-table-column prop="state" label="State" width="120" />
-                                    <el-table-column prop="city" label="City" width="120" />
-                                    <el-table-column prop="address" label="Address" width="600" />
-                                    <el-table-column prop="zip" label="Zip" width="120" />
-                                    <el-table-column fixed="right" label="Operations" min-width="120">
-                                        <template #default>
-                                            <el-button link type="primary" size="small" @click="handleClick">
-                                                Detail
+                                <!-- <el-button type="primary" @click="$router.push('/profile')">查看/编辑</el-button> -->
+                                <!-- 个人信息 -->
+                                <!-- <el-button type="primary" plain @click="dialogUserInformation = true">查看/编辑</el-button> -->
+                                <el-drawer v-model="dialogUserInformation" title="个人信息 🐱‍🏍"
+                                    :before-close="handleCloseUserInformation" direction="ltr" class="demo-drawer">
+                                    <div class="demo-drawer__content">
+                                        <el-form :model="formUserInformation">
+                                            <el-form-item label="Name" :label-width="formLabelWidth">
+                                                <el-input v-model="formUserInformation.name" autocomplete="off" />
+                                            </el-form-item>
+                                            <el-form-item label="Area" :label-width="formLabelWidth">
+                                                <el-select v-model="formUserInformation.region"
+                                                    placeholder="Please select activity area">
+                                                    <el-option label="Area1" value="shanghai" />
+                                                    <el-option label="Area2" value="beijing" />
+                                                </el-select>
+                                            </el-form-item>
+                                        </el-form>
+                                        <div class="demo-drawer__footer">
+                                            <el-button @click="cancelFormUserInformation">Cancel</el-button>
+                                            <el-button type="primary" :loading="loadingUserInformation"
+                                                @click="onClickUserInformation">
+                                                {{ loadingUserInformation ? 'Submitting ...' : 'Submit' }}
                                             </el-button>
-                                            <el-button link type="primary" size="small">Edit</el-button>
-                                        </template>
-                                    </el-table-column>
-                                </el-table>
+                                        </div>
+                                    </div>
+                                </el-drawer>
                             </div>
-                        </el-card>
-                    </div>
-                </el-col>
-                <el-col :span="12">
-                    <div class="noticeAll">
-                        <el-timeline style="max-width: 610px">
-                            <el-timeline-item timestamp="2018/4/12" placement="top">
-                                <el-card>
-                                    <h4>关于物业费调整的通知</h4>
-                                    <p>自2025年4月起，物业费调整为每月150元</p>
-                                </el-card>
-                            </el-timeline-item>
-                            <el-timeline-item timestamp="2018/4/3" placement="top">
-                                <el-card>
-                                    <h4>社区安全升级公告</h4>
-                                    <p>新增人脸识别门禁系统，3月20日启用</p>
-                                </el-card>
-                            </el-timeline-item>
-                            <el-timeline-item timestamp="2018/4/2" placement="top">
-                                <el-card>
-                                    <h4>Update Github template</h4>
-                                    <p>Tom committed 2018/4/2 20:46</p>
-                                </el-card>
-                            </el-timeline-item>
-                            <el-timeline-item timestamp="2018/4/2" placement="top">
-                                <el-card>
-                                    <h4>Update Github template</h4>
-                                    <p>Tom committed 2018/4/2 20:46</p>
-                                </el-card>
-                            </el-timeline-item>
-                            <el-timeline-item timestamp="2018/4/2" placement="top">
-                                <el-card>
-                                    <h4>Update Github template</h4>
-                                    <p>Tom committed 2018/4/2 20:46</p>
-                                </el-card>
-                            </el-timeline-item>
-                        </el-timeline>
-                    </div>
-                    <!-- <el-card shadow="hover" class="notice-card">
+                            <!-- </el-card> -->
+                        </div>
+                    </el-col>
+
+                    <!-- 车位信息 -->
+                    <el-col :span="6">
+                        <div @click="setShowMainContent(false); router.push({ path: '/user/ShowCarport', query: { userId: currentUser.id, username: currentUser.username } });"
+                            class="my-card-container">
+                            <!-- <el-card shadow="hover" class="module-card"> -->
+                            <!-- <template #header> -->
+                            <div class="Mycard-header">车位信息</div>
+                            <!-- </template> -->
+                            <div class="Mycard-content">
+                                <div class="info-item Mycard-itemH">
+                                    <span>车位名称：</span>
+                                    {{
+                                        currentUser.carport_msgs && currentUser.carport_msgs.length > 0 ?
+                                        currentUser.carport_msgs[0].name : '暂无车位信息'
+                                    }}
+                                </div>
+                                <div v-if="parkingInfo.status" class="info-item">
+                                    <span>车位编号：</span>
+                                    {{
+                                        currentUser.carport_msgs && currentUser.carport_msgs.length > 0 ?
+                                        currentUser.carport_msgs[0].ID : '暂无车位信息'
+                                    }}
+                                </div>
+                                <!-- <el-button type="primary" @click="$router.push('/parking')">查看车位</el-button> -->
+
+                                <!-- <el-button text @click="table = true">Open Drawer with nested table</el-button> -->
+
+                            </div>
+                            <!-- </el-card> -->
+                        </div>
+                    </el-col>
+
+
+
+                    <!-- 账单信息 -->
+                    <el-col :span="6">
+                        <div class="my-card-container">
+                            <!-- <el-card shadow="hover" class="module-card"> -->
+                            <!-- <template #header> -->
+                            <div class="Mycard-header">账单信息</div>
+                            <!-- </template> -->
+                            <div class="Mycard-content">
+                                <div class="info-item Mycard-itemH">
+                                    <span>账单状态：</span>{{ billList.length > 0 ? '未缴费' : '已缴费' }}
+                                </div>
+                                <div class="info-item">
+                                    <span>账单个数：</span>{{ billList.length }} 个
+                                </div>
+                                <!-- <el-button type="primary" @click="$router.push('/payment')">立即缴费</el-button> -->
+                            </div>
+                            <!-- </el-card> -->
+                        </div>
+                    </el-col>
+
+                    <!-- 房屋信息 -->
+                    <el-col :span="6">
+                        <div @click="setShowMainContent(false); router.push({ path: '/user/ShowHouse', query: { userId: currentUser.id, username: currentUser.username } });"
+                            class="my-card-container">
+                            <!-- <el-card shadow="hover" class="module-card"> -->
+                            <!-- <template #header> -->
+                            <div class="Mycard-header">房屋信息</div>
+                            <!-- </template> -->
+                            <div class="Mycard-content">
+                                <div class="info-item Mycard-itemH">
+                                    <span>房屋编号：</span>
+                                    {{
+                                        currentUser.house_msgs && currentUser.house_msgs.length > 0 ?
+                                        currentUser.house_msgs[0].ID : '暂无房屋'
+                                    }}
+                                </div>
+                                <div class="info-item">
+                                    <span>房屋名称：</span>
+                                    {{
+                                        currentUser.house_msgs && currentUser.house_msgs.length > 0 ?
+                                        currentUser.house_msgs[0].name : '暂无房屋'
+                                    }}
+                                </div>
+                                <!-- <el-button type="primary" @click="$router.push('/repair')">提交报修申请</el-button> -->
+                            </div>
+                            <!-- </el-card> -->
+                        </div>
+                    </el-col>
+                </el-row>
+
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <div class="fourCard">
+                            <div @click="setShowMainContent(false); router.push({ path: '/user/AddRepair', query: { userId: currentUser.id, username: currentUser.username } });"
+                                class="fourCarditem swing">
+                                <div>
+                                    <div>
+                                        <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
+                                    </div>
+                                    <div>新报修</div>
+                                </div>
+                            </div>
+                            <div @click="setShowMainContent(false); router.push({ path: '/user/BuyCarport', query: { userId: currentUser.id, username: currentUser.username } });"
+                                class="fourCarditem swing">
+                                <div>
+                                    <div>
+                                        <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
+                                    </div>
+                                    <div>预定车位</div>
+                                </div>
+                            </div>
+                            <div @click="setShowMainContent(false); router.push({ path: '/user/UserBill', query: { userId: currentUser.id, username: currentUser.username } });"
+                                class="fourCarditem swing">
+                                <div>
+                                    <div>
+                                        <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
+                                    </div>
+                                    <div>看账单</div>
+                                </div>
+                            </div>
+                            <div @click="setShowMainContent(false); router.push({ path: '/user/editUser', query: { userId: currentUser.id, username: currentUser.username } });"
+                                class="fourCarditem swing">
+                                <div>
+                                    <div>
+                                        <img src="@/assets/钱包.svg" alt="" style="width: 40px;">
+                                    </div>
+                                    <div>改密码</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <el-card shadow="hover" class="notice-card">
+                                <template #header>
+                                    <div class="card-header">我的报修</div>
+                                </template>
+                                <div class="">
+                                    <el-table :data="repairList" height="187" style="width: 100%">
+                                        <el-table-column fixed prop="id" label="报修编号" width="100" />
+                                        <el-table-column prop="content" label="报修内容" width="250" />
+                                        <el-table-column prop="status" label="报修状态" width="180" />
+                                        <el-table-column prop="createTime" label="时间" width="400" />
+                                        <!-- <el-table-column fixed="right" label="Operations" min-width="120">
+                                            <template #default>
+                                                <el-button link type="primary" size="small" @click="handleClick">
+                                                    Detail
+                                                </el-button>
+                                                <el-button link type="primary" size="small">Edit</el-button>
+                                            </template>
+                                        </el-table-column> -->
+                                    </el-table>
+                                </div>
+                            </el-card>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="noticeAll">
+                            <el-timeline style="max-width: 610px">
+                                <!-- 遍历noticeList数组，渲染数据 -->
+                                <!-- <template v-for="(item, index) in noticeList" :key="index">
+                                    <el-timeline-item :timestamp="item.timestamp" placement="top">
+                                        <el-card>
+                                            <h4>{{ item.title }}</h4>
+                                            <p>{{ item.content }}</p>
+                                        </el-card>
+                                    </el-timeline-item>
+                                </template> -->
+
+                                <el-timeline-item v-for="(item, index) in noticeList" :key="index"
+                                    :timestamp="item.createTime" placement="top">
+                                    <el-card>
+                                        <h4>{{ item.title }}</h4>
+                                        <p>{{ item.content }}</p>
+                                    </el-card>
+                                </el-timeline-item>
+
+
+                                <!-- <el-timeline-item timestamp="2018/4/12" placement="top">
+                                    <el-card>
+                                        <h4>关于物业费调整的通知</h4>
+                                        <p>自2025年4月起，物业费调整为每月150元</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2018/4/3" placement="top">
+                                    <el-card>
+                                        <h4>社区安全升级公告</h4>
+                                        <p>新增人脸识别门禁系统，3月20日启用</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2018/4/2" placement="top">
+                                    <el-card>
+                                        <h4>Update Github template</h4>
+                                        <p>Tom committed 2018/4/2 20:46</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2018/4/2" placement="top">
+                                    <el-card>
+                                        <h4>Update Github template</h4>
+                                        <p>Tom committed 2018/4/2 20:46</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2018/4/2" placement="top">
+                                    <el-card>
+                                        <h4>Update Github template</h4>
+                                        <p>Tom committed 2018/4/2 20:46</p>
+                                    </el-card>
+                                </el-timeline-item> -->
+                            </el-timeline>
+                        </div>
+                        <!-- <el-card shadow="hover" class="notice-card">
                         <template #header>
                             <div class="card-header">最新公告</div>
                         </template>
@@ -462,10 +557,10 @@ onMounted(async () => {
                             </div>
                         </div>
                     </el-card> -->
-                </el-col>
-            </el-row>
+                    </el-col>
+                </el-row>
 
-            <!-- <el-row :gutter="20">
+                <!-- <el-row :gutter="20">
                 公告信息
                 <el-col :xs="24" :sm="24" :md="24">
                     <el-card shadow="hover" class="notice-card">
@@ -482,6 +577,7 @@ onMounted(async () => {
                     </el-card>
                 </el-col>
             </el-row> -->
+            </div>
         </el-main>
     </div>
 </template>
