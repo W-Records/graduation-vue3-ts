@@ -27,3 +27,8 @@ export const getCurrentUserService = () => {
 export const updateUserService = (user: any) => {
   return axios.patch('/user/updateUserMsg', user)
 }
+
+// 删除用户
+export const deleteUserService = (userId: any) => {
+  return axios.delete(`/user/deleteUserMsg/${userId}`)
+}

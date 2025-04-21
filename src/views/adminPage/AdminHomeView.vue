@@ -41,7 +41,7 @@ const handleLogout = () => {
             <div style="margin-left: 18px;font-size: 20px;font-weight: 600;">后台.社区管理系统 🐱‍🐉</div>
             <div style="margin-right: 18px; display: flex; align-items: center;">
                 <el-dropdown trigger="click">
-                    <div class="user-name">欢迎您😀，张三</div>
+                    <div class="user-name">欢迎您😀</div>
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>

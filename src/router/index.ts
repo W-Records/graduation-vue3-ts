@@ -98,6 +98,22 @@ const router = createRouter({
           name: 'NoticeManagement',
           component: () => import('../views/adminPage/noticeManagement/NoticeManagementView.vue'),
         },
+        {
+          path: 'EditPersonnerButton',
+          name: 'EditPersonnerButton',
+          component: () =>
+            import(
+              '../views/adminPage/buttonform/personnerManagementButton/EditPersonnerButton.vue'
+            ),
+        },
+        {
+          path: 'DelectPersonnerButton',
+          name: 'DelectPersonnerButton',
+          component: () =>
+            import(
+              '../views/adminPage/buttonform/personnerManagementButton/DelectPersonnerButton.vue'
+            ),
+        },
       ],
     },
     {

@@ -20,6 +20,8 @@ const onSubmit = () => {
     form.userId = id
     console.log(form)
     assignHouseService(form);
+
+    router.push('/admin/PersonnelManagement')
 }
 
 
@@ -72,7 +74,7 @@ onMounted(async () => {
 
             <el-form-item>
                 <el-button type="primary" @click="onSubmit">Create</el-button>
-                <el-button>Cancel</el-button>
+                <el-button @click="router.push('/admin/PersonnelManagement')">Cancel</el-button>
             </el-form-item>
         </el-form>
     </div>
