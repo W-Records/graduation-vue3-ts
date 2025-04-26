@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 import {
     Check,
     Delete,
@@ -9,7 +12,7 @@ import {
     Plus,
 } from '@element-plus/icons-vue'
 import { onMounted } from 'vue'
-import { getNoticeListService, addNoticeService } from '@/api/NoticeApi'
+import { getNoticeListService, addNoticeService, deleteNoticeService } from '@/api/NoticeApi'
 
 
 
@@ -78,7 +81,26 @@ const cancelForm = () => {
 
 
 
+// 分页
+import { computed } from 'vue';
+const currentPage = ref(1);
+const pageSize = ref(8);
+const len = ref(tableData.value.length);
+console.log("长度");
+console.log(tableData.value);
+console.log(tableData.value.length);
+const total = ref(len);
 
+// 计算当前页数据
+const tableDataPage = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return tableData.value.slice(start, end);
+});
+const handlePageChange = (page: any) => {
+    currentPage.value = page;
+    // 刷新表格数据
+};
 
 
 
@@ -88,10 +110,33 @@ onMounted(async () => {
         const response: any = await getNoticeListService();
         console.log(response);
         tableData.value = response;
+
+        len.value = tableData.value.length;
+        total.value = tableData.value.length;
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
 })
+
+
+const deleteNotice = async (id: any) => {
+    console.log(id);
+    await deleteNoticeService(id)
+    ElMessage({
+        message: '删除成功',
+        type: 'success',
+    })
+
+
+    const response: any = await getNoticeListService();
+    console.log(response);
+    tableData.value = response;
+}
+
+
+const pageChange = () => {
+    console.log('pageChange');
+}
 </script>
 
 <template>
@@ -125,25 +170,28 @@ onMounted(async () => {
                     </div>
                 </el-drawer>
             </div>
-            <el-table :data="tableData" style="width: 100%">
+            <el-table :data="tableDataPage" style="width: 100%">
                 <el-table-column fixed prop="id" label="公告编号" width="200" />
                 <el-table-column prop="title" label="公告标题" width="300" />
                 <el-table-column prop="content" label="公告内容" width="400" />
                 <el-table-column prop="createTime" label="时间" width="400" />
                 <!-- <el-table-column prop="type" label="房屋类型" width="180" />
                 <el-table-column prop="atTime" label="房屋到期时间" width="600" /> -->
-                <el-table-column fixed="right" label="Operations" min-width="200">
-                    <template #default>
-                        <el-button type="primary" size="small" @click="handleClick">
+                <el-table-column fixed="right" label="Operations" min-width="150">
+                    <template #default="scope">
+                        <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
-                        </el-button>
-                        <el-button type="primary" size="small">修改</el-button>
+                        </el-button> -->
+                        <el-button @click="router.push({ path: '/admin/updateNotice', query: { noticeId: scope.row.id } })"
+                            type="primary" size="small">修改</el-button>
+                        <el-button @click="deleteNotice(scope.row.id)" type="primary" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
         <div class="admin-body-main-table-pagination">
-            <el-pagination background layout="prev, pager, next" :total="1000" />
+            <el-pagination :current-page="currentPage" :page-size="pageSize" :total="total"
+                @current-change="handlePageChange" background layout="prev, pager, next" />
         </div>
     </div>
 </template>

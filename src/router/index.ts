@@ -114,6 +114,21 @@ const router = createRouter({
               '../views/adminPage/buttonform/personnerManagementButton/DelectPersonnerButton.vue'
             ),
         },
+        {
+          path: 'updateHouse',
+          name: 'updateHouse',
+          component: () => import('../views/adminPage/buttonform/houseButton/updateHouse.vue'),
+        },
+        {
+          path: 'updateCarport',
+          name: 'updateCarport',
+          component: () => import('../views/adminPage/buttonform/carButton/updateCarport.vue'),
+        },
+        {
+          path: 'updateNotice',
+          name: 'updateNotice',
+          component: () => import('../views/adminPage/buttonform/noticeButton/updateNotice.vue'),
+        },
       ],
     },
     {

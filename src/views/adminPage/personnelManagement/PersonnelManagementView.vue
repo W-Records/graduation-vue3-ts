@@ -52,7 +52,26 @@ const deleteUser = (id: any) => {
 
 
 
+// 分页
+import { computed } from 'vue';
+const currentPage = ref(1);
+const pageSize = ref(8);
+const len = ref(tableData.value.length);
+console.log("长度");
+console.log(tableData.value);
+console.log(tableData.value.length);
+const total = ref(len);
 
+// 计算当前页数据
+const tableDataPage = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return tableData.value.slice(start, end);
+});
+const handlePageChange = (page: any) => {
+    currentPage.value = page;
+    // 刷新表格数据
+};
 
 onMounted(async () => {
     try {
@@ -101,6 +120,10 @@ onMounted(async () => {
 
         console.log(tableData.value);
 
+
+        len.value = tableData.value.length;
+        total.value = tableData.value.length;
+
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
@@ -110,7 +133,7 @@ onMounted(async () => {
 <template>
     <div class="admin-body-main-table">
         <div class="admin-body-main-table-content">
-            <el-table :data="tableData" style="width: 100%">
+            <el-table :data="tableDataPage" style="width: 100%">
                 <el-table-column fixed prop="id" label="用户编号" width="150" />
                 <el-table-column prop="username" label="用户名" width="180" />
                 <el-table-column prop="phone" label="手机号" width="180" />
@@ -134,7 +157,8 @@ onMounted(async () => {
             </el-table>
         </div>
         <div class="admin-body-main-table-pagination">
-            <el-pagination background layout="prev, pager, next" :total="1000" />
+            <el-pagination :current-page="currentPage" :page-size="pageSize" :total="total"
+                @current-change="handlePageChange" background layout="prev, pager, next" />
         </div>
     </div>
 </template>

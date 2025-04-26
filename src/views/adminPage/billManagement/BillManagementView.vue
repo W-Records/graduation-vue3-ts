@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
 import {
     Check,
     Delete,
@@ -9,7 +10,7 @@ import {
     Plus,
 } from '@element-plus/icons-vue'
 import { onMounted } from 'vue'
-import { getBillListService, addBillService } from '@/api/BillApi'
+import { getBillListService, addBillService, deleteBillService } from '@/api/BillApi'
 import { getAllUserService } from '@/api/UserApi'
 
 
@@ -91,6 +92,29 @@ const cancelForm = () => {
 let getUserResponse: any = ref([]);
 
 
+
+// 分页
+import { computed } from 'vue';
+const currentPage = ref(1);
+const pageSize = ref(8);
+const len = ref(tableData.value.length);
+console.log("长度");
+console.log(tableData.value);
+console.log(tableData.value.length);
+const total = ref(len);
+
+// 计算当前页数据
+const tableDataPage = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return tableData.value.slice(start, end);
+});
+const handlePageChange = (page: any) => {
+    currentPage.value = page;
+    // 刷新表格数据
+};
+
+
 onMounted(async () => {
     try {
         const response: any = await getBillListService();
@@ -98,7 +122,8 @@ onMounted(async () => {
         tableData.value = response;
 
 
-
+        len.value = tableData.value.length;
+        total.value = tableData.value.length;
 
 
 
@@ -110,6 +135,21 @@ onMounted(async () => {
         console.error('获取房屋数据失败', error)
     }
 })
+
+
+const deleteBill = async (id: any) => {
+    console.log(id);
+    await deleteBillService(id);
+    ElMessage({
+        message: '删除成功',
+        type: 'success',
+    })
+
+    const response: any = await getBillListService();
+    console.log(response);
+    tableData.value = response;
+}
+
 </script>
 
 <template>
@@ -146,25 +186,25 @@ onMounted(async () => {
                     </div>
                 </el-drawer>
             </div>
-            <el-table :data="tableData" style="width: 100%">
-                <el-table-column fixed prop="id" label="账单编号" width="150" />
-                <el-table-column prop="name" label="账单名" width="180" />
-                <el-table-column prop="price" label="账单价格" width="180" />
-                <el-table-column prop="username" label="用户名" width="300" />
-                <el-table-column prop="status" label="账单状态" width="180" />
-                <el-table-column prop="atTime" label="房屋到期时间" width="600" />
-                <el-table-column fixed="right" label="Operations" min-width="200">
-                    <template #default>
-                        <el-button type="primary" size="small" @click="handleClick">
+            <el-table :data="tableDataPage" style="width: 100%">
+                <el-table-column fixed prop="id" label="账单编号" width="230" />
+                <el-table-column prop="name" label="账单名" width="230" />
+                <el-table-column prop="price" label="账单价格" width="230" />
+                <el-table-column prop="username" label="用户名" width="230" />
+                <el-table-column prop="status" label="账单状态" width="600" />
+                <el-table-column fixed="right" label="Operations" min-width="150">
+                    <template #default="scope">
+                        <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
-                        </el-button>
-                        <el-button type="primary" size="small">修改</el-button>
+                        </el-button> -->
+                        <el-button @click="deleteBill(scope.row.id)" type="primary" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
         <div class="admin-body-main-table-pagination">
-            <el-pagination background layout="prev, pager, next" :total="1000" />
+            <el-pagination :current-page="currentPage" :page-size="pageSize" :total="total"
+                @current-change="handlePageChange" background layout="prev, pager, next" />
         </div>
     </div>
 </template>

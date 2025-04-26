@@ -19,3 +19,8 @@ export const getBillByUserIdService = (userid: string) => {
 export const updateBillStatusService = (id: string) => {
   return axios.patch(`/bill/updateBillStatus/${id}`)
 }
+
+// 删除账单，后端接口@Delete(':id')
+export const deleteBillService = (id: string) => {
+  return axios.delete(`/bill/${id}`)
+}

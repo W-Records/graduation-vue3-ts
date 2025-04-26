@@ -63,17 +63,17 @@ const handleLogout = () => {
                         </RouterLink>
                     </el-menu-item>
 
-                    <el-menu-item index="12">
-                        <RouterLink to="/admin/HouseManagement" style="text-decoration: none;color: inherit;">
-                            <el-icon><icon-menu /></el-icon>
-                            <span>房屋管理</span>
-                        </RouterLink>
-                    </el-menu-item>
-
                     <el-menu-item index="13">
                         <RouterLink to="/admin/carManagement" style="text-decoration: none;color: inherit;">
                             <el-icon><icon-menu /></el-icon>
                             <span>车辆管理</span>
+                        </RouterLink>
+                    </el-menu-item>
+
+                    <el-menu-item index="12">
+                        <RouterLink to="/admin/HouseManagement" style="text-decoration: none;color: inherit;">
+                            <el-icon><icon-menu /></el-icon>
+                            <span>房屋管理</span>
                         </RouterLink>
                     </el-menu-item>
 

@@ -14,3 +14,13 @@ export const addRepairService = (data: any) => {
 export const getUserRepairListService = (id: string) => {
   return axios.get(`/repair/findUserRepairs/${id}`)
 }
+
+// 根据前端转递的id，修改status字段为已处理，后端地址@Post('updateStatus/:Id')
+export const updateStatusService = (id: string) => {
+  return axios.post(`/repair/updateStatus/${id}`)
+}
+
+// 删除账单，@Delete(':id')
+export const deleteRepairService = (id: string) => {
+  return axios.delete(`/repair/${id}`)
+}

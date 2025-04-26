@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 import {
     Check,
     Delete,
@@ -9,7 +13,7 @@ import {
     Plus,
 } from '@element-plus/icons-vue'
 import { onMounted } from 'vue'
-import { getHouseListService, addHouseService } from '@/api/HouseApi'
+import { getHouseListService, addHouseService, removeUserService, updateHouseService, removeHouseService } from '@/api/HouseApi'
 
 
 
@@ -88,15 +92,104 @@ const cancelForm = () => {
 
 
 
+const moveUser = async (id: any) => {
 
+    console.log(id);
+    await removeUserService(id)
+    ElMessage({
+        message: '已经移除户主',
+        type: 'success',
+    })
+    // 重新加载此路由
+    // router.push('/admin/HouseManagement')
+    const response: any = await getHouseListService();
+    console.log("aaa");
+    console.log(response);
+    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
+    response.forEach((item: any) => {
+        if (item.userid === null) {
+            item.live = '未入住'
+        } else {
+            item.live = '已入住'
+        }
+    })
+    console.log(response);
+    tableData.value = response;
+
+}
+
+const updateHouse = async (id: any) => {
+    console.log(id);
+}
+
+const deleteHouse = async (id: any) => {
+    console.log(id);
+    await removeHouseService(id);
+    ElMessage({
+        message: '删除成功',
+        type: 'success',
+    })
+
+    const response: any = await getHouseListService();
+    console.log("aaa");
+    console.log(response);
+    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
+    response.forEach((item: any) => {
+        if (item.userid === null) {
+            item.live = '未入住'
+        } else {
+            item.live = '已入住'
+        }
+    })
+    console.log(response);
+    tableData.value = response;
+
+}
+
+
+
+// 分页
+import { computed } from 'vue';
+const currentPage = ref(1);
+const pageSize = ref(8);
+const len = ref(tableData.value.length);
+console.log("长度");
+console.log(tableData.value);
+console.log(tableData.value.length);
+const total = ref(len);
+
+// 计算当前页数据
+const tableDataPage = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return tableData.value.slice(start, end);
+});
+const handlePageChange = (page: any) => {
+    currentPage.value = page;
+    // 刷新表格数据
+};
 
 
 
 onMounted(async () => {
     try {
         const response: any = await getHouseListService();
+        console.log("aaa");
+        console.log(response);
+        // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
+        response.forEach((item: any) => {
+            if (item.userid === null) {
+                item.live = '未入住'
+            } else {
+                item.live = '已入住'
+            }
+        })
         console.log(response);
         tableData.value = response;
+
+
+        len.value = tableData.value.length;
+        total.value = tableData.value.length;
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
@@ -137,25 +230,30 @@ onMounted(async () => {
                     </div>
                 </el-drawer>
             </div>
-            <el-table :data="tableData" style="width: 100%">
+            <el-table :data="tableDataPage" style="width: 100%">
                 <el-table-column fixed prop="id" label="房屋编号" width="150" />
                 <el-table-column prop="name" label="房屋名" width="180" />
                 <el-table-column prop="area" label="房屋大小" width="180" />
+                <el-table-column prop="live" label="房屋入住情况" width="180" />
                 <el-table-column prop="roomNumber" label="房屋位置" width="300" />
                 <el-table-column prop="type" label="房屋类型" width="180" />
                 <el-table-column prop="atTime" label="房屋到期时间" width="600" />
-                <el-table-column fixed="right" label="Operations" min-width="200">
-                    <template #default>
-                        <el-button type="primary" size="small" @click="handleClick">
+                <el-table-column fixed="right" label="Operations" min-width="220">
+                    <template #default="scope">
+                        <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
-                        </el-button>
-                        <el-button type="primary" size="small">修改</el-button>
+                        </el-button> -->
+                        <el-button @click="moveUser(scope.row.id)" type="primary" size="small">移除户主</el-button>
+                        <el-button @click="router.push({ path: '/admin/updateHouse', query: { houseId: scope.row.id } })"
+                            type="primary" size="small">修改</el-button>
+                        <el-button @click="deleteHouse(scope.row.id)" type="primary" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
         <div class="admin-body-main-table-pagination">
-            <el-pagination background layout="prev, pager, next" :total="1000" />
+            <el-pagination :current-page="currentPage" :page-size="pageSize" :total="total"
+                @current-change="handlePageChange" background layout="prev, pager, next" />
         </div>
     </div>
 </template>

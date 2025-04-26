@@ -19,3 +19,18 @@ export const getParkingListService = () => {
 export const updateParkingService = (data: any) => {
   return axios.post('/car/updateCarInfo', data)
 }
+
+// 更具id删除车位的用户信息，后端接口：@Post('removeUserId/:carid')
+export const removeUserIdService = (carid: string) => {
+  return axios.post(`/car/removeUserId/${carid}`)
+}
+
+// 删除车位，@Post('removeCarport/:id')
+export const removeCarportService = (id: string) => {
+  return axios.post(`/car/removeCarport/${id}`)
+}
+
+// 根据前端传递的id，修改指定车位的name字段的值，后端地址@Post('updateCarport')
+export const updateCarportService = (data: any) => {
+  return axios.post('/car/updateCarport', data)
+}
