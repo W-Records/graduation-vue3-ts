@@ -57,7 +57,7 @@ onMounted(async () => {
                 <el-select v-model="form.houseId" placeholder="please select your zone">
                     <!-- 遍历allHouse -->
                     <el-option v-for="item in allHouse" :key="item.id"
-                        :label="'房名:' + item.name + '---地址:' + item.roomNumber" :value="item.id" />
+                        :label="'楼栋:' + item.address + '---房间号:' + item.roomNumber" :value="item.id" />
                     <!-- <el-option label="Zone one" value="shanghai" />
                     <el-option label="Zone two" value="beijing" /> -->
                 </el-select>

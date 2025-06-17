@@ -14,7 +14,9 @@ import { getRepairListService, updateStatusService, deleteRepairService } from '
 
 
 
-
+// 搜索框的单选项
+const radio1 = ref('status')
+const input2 = ref('')
 
 
 // 表格
@@ -154,50 +156,98 @@ const deleteRepair = async (id: any) => {
 }
 
 
+
+const searchData = async () => {
+    console.log(radio1.value);
+    console.log(input2.value);
+
+    // const response: any = await getBillListService();
+    const response: any = await getRepairListService();
+    console.log(response);
+
+
+    console.log(response);
+    // 我现在需要在response数组对象中过滤数据，radio1为过滤时的属性，input2为过滤时用户输入的内容
+    const responseFilter = response.filter((item: any) => {
+        if (radio1.value === "name") {
+            return item.name.includes(input2.value);
+        } else if (radio1.value === "username") {
+            return item.username.includes(input2.value);
+        } else if (radio1.value === "status") {
+            return item.status.includes(input2.value);
+        }
+    });
+    console.log(responseFilter);
+    tableData.value = responseFilter;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
+}
 </script>
 
 <template>
     <div class="admin-body-main-table">
         <div class="admin-body-main-table-content">
             <div class="admin-body-main-table-content-title">
-                <!-- <el-button @click="dialog = true" type="primary" :icon="Plus" circle /> -->
-                <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
-                <el-drawer v-model="dialog" title="添加房屋" :before-close="handleClose" direction="ltr" class="demo-drawer">
-                    <div class="demo-drawer__content">
-                        <el-form :model="form">
-                            <el-form-item label="房屋名" :label-width="formLabelWidth">
-                                <el-input v-model="form.name" autocomplete="off" />
-                            </el-form-item>
-                            <el-form-item label="房屋大小" :label-width="formLabelWidth">
-                                <el-input v-model="form.area" autocomplete="off" />
-                            </el-form-item>
-                            <el-form-item label="房屋地址" :label-width="formLabelWidth">
-                                <el-input v-model="form.roomNumber" autocomplete="off" />
-                            </el-form-item>
-                            <!-- <el-form-item label="Area" :label-width="formLabelWidth">
+                <div>
+                    <div class="admin-body-main-table-content-title-search">
+                        <el-radio-group v-model="radio1" size="large" fill="#6cf">
+                            <!-- <el-radio-button label="账单名" value="name" />
+                            <el-radio-button label="用户名" value="username" /> -->
+                            <el-radio-button label="报修状态" value="status" />
+                        </el-radio-group>
+                        <div style="margin-left: 40px">
+                            <el-input v-model="input2" style="width: 240px" placeholder="根据按钮选项搜索" :prefix-icon="Search" />
+                            <el-button @click="searchData()" style="margin-left: 6px" type="primary" round
+                                size="small">搜索</el-button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <!-- <el-button @click="dialog = true" type="primary" :icon="Plus" circle /> -->
+                    <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
+                    <el-drawer v-model="dialog" title="添加房屋" :before-close="handleClose" direction="ltr"
+                        class="demo-drawer">
+                        <div class="demo-drawer__content">
+                            <el-form :model="form">
+                                <el-form-item label="房屋名" :label-width="formLabelWidth">
+                                    <el-input v-model="form.name" autocomplete="off" />
+                                </el-form-item>
+                                <el-form-item label="房屋大小" :label-width="formLabelWidth">
+                                    <el-input v-model="form.area" autocomplete="off" />
+                                </el-form-item>
+                                <el-form-item label="房屋地址" :label-width="formLabelWidth">
+                                    <el-input v-model="form.roomNumber" autocomplete="off" />
+                                </el-form-item>
+                                <!-- <el-form-item label="Area" :label-width="formLabelWidth">
                                 <el-select v-model="form.region" placeholder="Please select activity area">
                                     <el-option label="Area1" value="shanghai" />
                                     <el-option label="Area2" value="beijing" />
                                 </el-select>
                             </el-form-item> -->
-                        </el-form>
-                        <div class="demo-drawer__footer">
-                            <el-button @click="cancelForm">Cancel</el-button>
-                            <el-button type="primary" :loading="loading" @click="onClick">
-                                {{ loading ? 'Submitting ...' : 'Submit' }}
-                            </el-button>
+                            </el-form>
+                            <div class="demo-drawer__footer">
+                                <el-button @click="cancelForm">Cancel</el-button>
+                                <el-button type="primary" :loading="loading" @click="onClick">
+                                    {{ loading ? 'Submitting ...' : 'Submit' }}
+                                </el-button>
+                            </div>
                         </div>
-                    </div>
-                </el-drawer>
+                    </el-drawer>
+                </div>
             </div>
             <el-table :data="tableDataPage" style="width: 100%">
-                <el-table-column fixed prop="id" label="报修编号" width="200" />
-                <el-table-column prop="content" label="报修内容" width="300" />
-                <el-table-column prop="username" label="用户名" width="200" />
+                <el-table-column fixed prop="id" label="报修编号" width="150" />
+                <el-table-column prop="content" label="报修内容" width="200" />
+                <el-table-column prop="username" label="用户名" width="160" />
+                <el-table-column prop="phone" label="用户手机号" width="160" />
+                <el-table-column prop="address" label="隶属楼栋" width="160" />
+                <el-table-column prop="roomNumber" label="房间号" width="160" />
                 <el-table-column prop="status" label="是否已处理" width="200" />
                 <el-table-column prop="createTime" label="报修单创建时间" width="600" />
                 <!-- <el-table-column prop="atTime" label="房屋到期时间" width="600" /> -->
-                <el-table-column fixed="right" label="Operations" min-width="200">
+                <el-table-column fixed="right" label="操作" min-width="200">
                     <template #default="scope">
                         <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
@@ -216,6 +266,11 @@ const deleteRepair = async (id: any) => {
 </template>
 
 <style scoped>
+.admin-body-main-table-content-title-search {
+    display: flex;
+    align-items: center;
+}
+
 .admin-body-main-table-pagination {
     display: flex;
     align-items: center;
@@ -229,9 +284,9 @@ const deleteRepair = async (id: any) => {
 
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
 
-    height: 50px;
+    height: 60px;
     padding: 10px;
     border-bottom: solid 0.8px rgb(217, 207, 207);
 }

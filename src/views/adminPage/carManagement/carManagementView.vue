@@ -16,7 +16,9 @@ import { getCarListService, addCarService, removeUserIdService, removeCarportSer
 
 
 
-
+// 搜索框的单选项
+const radio1 = ref('live')
+const input2 = ref('')
 
 
 // 表格
@@ -42,6 +44,7 @@ const loading = ref(false)
 const form = reactive({
     name: '',
     type: '',
+    updown: '',
 })
 
 // 添加车位信息
@@ -50,6 +53,23 @@ const onClick = async () => {
     await addCarService(form);
     loading.value = false
     dialog.value = false
+
+
+    let response: any = await getCarListService();
+    response.forEach((item: any) => {
+        if (item.userid === null) {
+            item.live = '未有车'
+        } else {
+            item.live = '已有车'
+        }
+    })
+    // 排除掉type为消防车位的对象
+    response = response.filter((item: any) => item.type !== '消防车位')
+    console.log(response);
+    tableData.value = response;
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
 }
 
 const handleClose = (done: any) => {
@@ -90,7 +110,7 @@ const moveUser = async (id: any) => {
         message: '已经移除户主',
         type: 'success',
     })
-    const response: any = await getCarListService();
+    let response: any = await getCarListService();
     response.forEach((item: any) => {
         if (item.userid === null) {
             item.live = '未有车'
@@ -98,8 +118,13 @@ const moveUser = async (id: any) => {
             item.live = '已有车'
         }
     })
+    // 排除掉type为消防车位的对象
+    response = response.filter((item: any) => item.type !== '消防车位')
     console.log(response);
     tableData.value = response;
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
 }
 
 const deleteCarport = async (id: any) => {
@@ -109,7 +134,7 @@ const deleteCarport = async (id: any) => {
         message: '已经删除车位',
         type: 'success',
     })
-    const response: any = await getCarListService();
+    let response: any = await getCarListService();
     response.forEach((item: any) => {
         if (item.userid === null) {
             item.live = '未有车'
@@ -117,8 +142,13 @@ const deleteCarport = async (id: any) => {
             item.live = '已有车'
         }
     })
+    // 排除掉type为消防车位的对象
+    response = response.filter((item: any) => item.type !== '消防车位')
     console.log(response);
     tableData.value = response;
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
 }
 
 
@@ -148,7 +178,7 @@ const handlePageChange = (page: any) => {
 
 onMounted(async () => {
     try {
-        const response: any = await getCarListService();
+        let response: any = await getCarListService();
         response.forEach((item: any) => {
             if (item.userid === null) {
                 item.live = '未有车'
@@ -156,6 +186,8 @@ onMounted(async () => {
                 item.live = '已有车'
             }
         })
+        // 排除掉type为消防车位的对象
+        response = response.filter((item: any) => item.type !== '消防车位')
         console.log(response);
         tableData.value = response;
 
@@ -165,43 +197,108 @@ onMounted(async () => {
         console.error('获取车辆数据失败', error)
     }
 })
+
+
+const searchData = async () => {
+    console.log(radio1.value);
+    console.log(input2.value);
+
+    // const response: any = await getBillListService();
+    let response: any = await getCarListService();
+    response.forEach((item: any) => {
+        if (item.userid === null) {
+            item.live = '未有车'
+        } else {
+            item.live = '已有车'
+        }
+    })
+    // 排除掉type为消防车位的对象
+    response = response.filter((item: any) => item.type !== '消防车位')
+    console.log(response);
+
+    console.log(response);
+    // 我现在需要在response数组对象中过滤数据，radio1为过滤时的属性，input2为过滤时用户输入的内容
+    const responseFilter = response.filter((item: any) => {
+        if (radio1.value === "live") {
+            return item.live.includes(input2.value);
+        } else if (radio1.value === "updown") {
+            return item.updown.includes(input2.value);
+        } else if (radio1.value === "status") {
+            return item.status.includes(input2.value);
+        }
+    });
+    console.log(responseFilter);
+    tableData.value = responseFilter;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
+}
 </script>
 
 <template>
     <div class="admin-body-main-table">
         <div class="admin-body-main-table-content">
             <div class="admin-body-main-table-content-title">
-                <el-button @click="dialog = true" type="primary" :icon="Plus" circle />
-                <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
-                <el-drawer v-model="dialog" title="添加房屋" :before-close="handleClose" direction="ltr" class="demo-drawer">
-                    <div class="demo-drawer__content">
-                        <el-form :model="form">
-                            <el-form-item label="车位名" :label-width="formLabelWidth">
-                                <el-input v-model="form.name" autocomplete="off" />
-                            </el-form-item>
-                            <el-form-item label="类型" :label-width="formLabelWidth">
-                                <el-select v-model="form.type" placeholder="Please select activity area">
-                                    <el-option label="普通车位" value="普通车位" />
-                                    <el-option label="消防车位" value="消防车位" />
-                                </el-select>
-                            </el-form-item>
-                        </el-form>
-                        <div class="demo-drawer__footer">
-                            <el-button @click="cancelForm">Cancel</el-button>
-                            <el-button type="primary" :loading="loading" @click="onClick">
-                                {{ loading ? 'Submitting ...' : 'Submit' }}
-                            </el-button>
+                <div>
+                    <div class="admin-body-main-table-content-title-search">
+                        <el-radio-group v-model="radio1" size="large" fill="#6cf">
+                            <el-radio-button label="车位状态" value="live" />
+                            <el-radio-button label="类型" value="updown" />
+                            <!-- <el-radio-button label="用户名" value="username" />
+                            <el-radio-button label="账单状态" value="status" /> -->
+                        </el-radio-group>
+                        <div style="margin-left: 40px">
+                            <el-input v-model="input2" style="width: 240px" placeholder="根据按钮选项搜索" :prefix-icon="Search" />
+                            <el-button @click="searchData()" style="margin-left: 6px" type="primary" round
+                                size="small">搜索</el-button>
                         </div>
                     </div>
-                </el-drawer>
+                </div>
+                <div>
+                    <el-button @click="dialog = true" type="primary" :icon="Plus" circle />
+                    <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
+                    <el-drawer v-model="dialog" title="添加房屋" :before-close="handleClose" direction="ltr"
+                        class="demo-drawer">
+                        <div class="demo-drawer__content">
+                            <el-form :model="form">
+                                <el-form-item label="车位名" :label-width="formLabelWidth">
+                                    <el-input v-model="form.name" autocomplete="off" />
+                                </el-form-item>
+                                <el-form-item label="类型" :label-width="formLabelWidth">
+                                    <el-select v-model="form.updown" placeholder="地上还是地下">
+                                        <el-option label="地上" value="地上" />
+                                        <el-option label="地下" value="地下" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="车位性质" :label-width="formLabelWidth">
+                                    <el-select v-model="form.type" placeholder="是否用于消防车位">
+                                        <el-option label="普通车位" value="普通车位" />
+                                        <el-option label="消防车位" value="消防车位" />
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                            <div class="demo-drawer__footer">
+                                <el-button @click="cancelForm">取消</el-button>
+                                <el-button type="primary" :loading="loading" @click="onClick">
+                                    {{ loading ? 'Submitting ...' : 'Submit' }}
+                                </el-button>
+                            </div>
+                        </div>
+                    </el-drawer>
+                </div>
             </div>
             <el-table :data="tableDataPage" style="width: 100%">
-                <el-table-column fixed prop="id" label="车辆编号" width="220" />
-                <el-table-column prop="name" label="车辆名" width="220" />
-                <el-table-column prop="live" label="车位状态" width="220" />
-                <el-table-column prop="type" label="车辆类型" width="220" />
+                <!-- <el-table-column fixed prop="id" label="#" width="220" /> -->
+                <el-table-column fixed prop="name" label="车位名" width="190" />
+                <el-table-column prop="updown" label="类型" width="190" />
+                <el-table-column prop="live" label="车位状态" width="190" />
+                <el-table-column prop="carnumber" label="车牌号" width="190" />
+                <el-table-column prop="username" label="车位归属人" width="190" />
+                <el-table-column prop="phone" label="车主电话" width="190" />
+                <el-table-column prop="type" label="使用状态" width="220" />
                 <el-table-column prop="atTime" label="到期时间" width="400" />
-                <el-table-column fixed="right" label="Operations" min-width="220">
+                <el-table-column fixed="right" label="操作" min-width="220">
                     <template #default="scope">
                         <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
@@ -222,6 +319,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.admin-body-main-table-content-title-search {
+    display: flex;
+    align-items: center;
+}
+
 .admin-body-main-table-pagination {
     display: flex;
     align-items: center;
@@ -235,9 +337,9 @@ onMounted(async () => {
 
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
 
-    height: 50px;
+    height: 60px;
     padding: 10px;
     border-bottom: solid 0.8px rgb(217, 207, 207);
 }

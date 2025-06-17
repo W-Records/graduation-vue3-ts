@@ -13,14 +13,14 @@ import {
     Plus,
 } from '@element-plus/icons-vue'
 import { onMounted } from 'vue'
-import { getHouseListService, addHouseService, removeUserService, updateHouseService, removeHouseService } from '@/api/HouseApi'
-
-import { addUnitsService, getUnitsService, deleteUnitsService } from '@/api/Unit'
+import { addBuildingsService, getBuildingsService, deleteBuildingsService } from '@/api/Building'
 
 
 // 搜索框的单选项
-const radio1 = ref('address')
+const radio1 = ref('name')
 const input2 = ref('')
+
+
 
 // 表格
 const handleClick = () => {
@@ -43,44 +43,31 @@ const dialog = ref(false)
 const loading = ref(false)
 
 const form = reactive({
-    Unit: {} as any,
-    elevator: "",
-    address: "",
     name: '',
     area: "",
     roomNumber: "",
+    type: "",
     region: '',
     date1: '',
     date2: '',
     delivery: false,
-    type: [],
     resource: '',
     desc: '',
+    address: '',
 })
-let getUnitResponse: any = ref([]);
 
 // 添加房屋信息
 const onClick = async () => {
     loading.value = true
-    form.elevator = form.Unit.buildingType
-    form.address = form.Unit.buildingName + form.Unit.name
-    console.log(form)
-    await addHouseService(form);
+    console.log(form);
+    await addBuildingsService(form);
     loading.value = false
     dialog.value = false
 
-    const response: any = await getHouseListService();
-    console.log("aaa");
+
+    const response: any = await getBuildingsService();
     console.log(response);
-    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
-    response.forEach((item: any) => {
-        if (item.userid === null) {
-            item.live = '未入住'
-        } else {
-            item.live = '已入住'
-        }
-    })
-    console.log(response);
+
     tableData.value = response;
 
 
@@ -118,31 +105,31 @@ const cancelForm = () => {
 
 
 
-const moveUser = async (id: any) => {
+// const moveUser = async (id: any) => {
 
-    console.log(id);
-    await removeUserService(id)
-    ElMessage({
-        message: '已经移除户主',
-        type: 'success',
-    })
-    // 重新加载此路由
-    // router.push('/admin/HouseManagement')
-    const response: any = await getHouseListService();
-    console.log("aaa");
-    console.log(response);
-    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
-    response.forEach((item: any) => {
-        if (item.userid === null) {
-            item.live = '未入住'
-        } else {
-            item.live = '已入住'
-        }
-    })
-    console.log(response);
-    tableData.value = response;
+//     console.log(id);
+//     await removeUserService(id)
+//     ElMessage({
+//         message: '已经移除户主',
+//         type: 'success',
+//     })
+//     // 重新加载此路由
+//     // router.push('/admin/HouseManagement')
+//     const response: any = await getHouseListService();
+//     console.log("aaa");
+//     console.log(response);
+//     // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
+//     response.forEach((item: any) => {
+//         if (item.userid === null) {
+//             item.live = '未入住'
+//         } else {
+//             item.live = '已入住'
+//         }
+//     })
+//     console.log(response);
+//     tableData.value = response;
 
-}
+// }
 
 const updateHouse = async (id: any) => {
     console.log(id);
@@ -150,25 +137,20 @@ const updateHouse = async (id: any) => {
 
 const deleteHouse = async (id: any) => {
     console.log(id);
-    await removeHouseService(id);
+    await deleteBuildingsService(id);
     ElMessage({
         message: '删除成功',
         type: 'success',
     })
 
-    const response: any = await getHouseListService();
-    console.log("aaa");
+    const response: any = await getBuildingsService();
     console.log(response);
-    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
-    response.forEach((item: any) => {
-        if (item.userid === null) {
-            item.live = '未入住'
-        } else {
-            item.live = '已入住'
-        }
-    })
-    console.log(response);
+
     tableData.value = response;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
 
 }
 
@@ -199,65 +181,38 @@ const handlePageChange = (page: any) => {
 
 onMounted(async () => {
     try {
-        const response: any = await getHouseListService();
-        console.log("aaa");
+        const response: any = await getBuildingsService();
         console.log(response);
-        // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
-        response.forEach((item: any) => {
-            if (item.userid === null) {
-                item.live = '未入住'
-            } else {
-                item.live = '已入住'
-            }
-        })
-        console.log(response);
+
         tableData.value = response;
 
 
         len.value = tableData.value.length;
         total.value = tableData.value.length;
-
-
-
-        // 获取楼栋单元信息
-        getUnitResponse.value = await getUnitsService();
-        console.log(getUnitResponse.value);
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
 })
+
 
 const searchData = async () => {
     console.log(radio1.value);
     console.log(input2.value);
 
     // const response: any = await getBillListService();
-    const response: any = await getHouseListService();
-    console.log("aaa");
+    const response: any = await getBuildingsService();
     console.log(response);
-    // 遍历response对象数组，为其对象添加live属性，如果对象中的userid属性为null，则live的值为未入住，如果为非null，则live的值为已入住
-    response.forEach((item: any) => {
-        if (item.userid === null) {
-            item.live = '未入住'
-        } else {
-            item.live = '已入住'
-        }
-    })
-    console.log(response);
-
 
 
     console.log(response);
     // 我现在需要在response数组对象中过滤数据，radio1为过滤时的属性，input2为过滤时用户输入的内容
     const responseFilter = response.filter((item: any) => {
-        if (radio1.value === "address") {
-            return item.address.includes(input2.value);
-        } else if (radio1.value === "roomNumber") {
-            return item.roomNumber.includes(input2.value);
-        } else if (radio1.value === "elevator") {
-            return item.elevator.includes(input2.value);
-        } else if (radio1.value === "live") {
-            return item.live.includes(input2.value);
+        if (radio1.value === "name") {
+            return item.name.includes(input2.value);
+        } else if (radio1.value === "type") {
+            return item.type.includes(input2.value);
+        } else if (radio1.value === "status") {
+            return item.status.includes(input2.value);
         }
     });
     console.log(responseFilter);
@@ -267,7 +222,6 @@ const searchData = async () => {
     len.value = tableData.value.length;
     total.value = tableData.value.length;
 }
-
 </script>
 
 <template>
@@ -277,10 +231,9 @@ const searchData = async () => {
                 <div>
                     <div class="admin-body-main-table-content-title-search">
                         <el-radio-group v-model="radio1" size="large" fill="#6cf">
-                            <el-radio-button label="隶属楼栋" value="address" />
-                            <el-radio-button label="房间号" value="roomNumber" />
-                            <el-radio-button label="电梯房" value="elevator" />
-                            <el-radio-button label="入住情况" value="live" />
+                            <el-radio-button label="楼栋号" value="name" />
+                            <el-radio-button label="是否有电梯" value="type" />
+                            <!-- <el-radio-button label="账单状态" value="status" /> -->
                         </el-radio-group>
                         <div style="margin-left: 40px">
                             <el-input v-model="input2" style="width: 240px" placeholder="根据按钮选项搜索" :prefix-icon="Search" />
@@ -296,25 +249,19 @@ const searchData = async () => {
                         class="demo-drawer">
                         <div class="demo-drawer__content">
                             <el-form :model="form">
-                                <el-form-item label="房屋昵称" :label-width="formLabelWidth">
+                                <el-form-item label="楼栋号" :label-width="formLabelWidth">
                                     <el-input v-model="form.name" autocomplete="off" />
                                 </el-form-item>
-                                <el-form-item label="房屋大小" :label-width="formLabelWidth">
-                                    <el-input v-model="form.area" autocomplete="off" />
+                                <el-form-item label="电梯房" :label-width="formLabelWidth">
+                                    <!-- <el-input v-model="form.area" autocomplete="off" /> -->
+                                    <el-radio-group v-model="form.type">
+                                        <el-radio value="是" size="large">是</el-radio>
+                                        <el-radio value="否" size="large">否</el-radio>
+                                    </el-radio-group>
                                 </el-form-item>
-                                <el-form-item label="房间号" :label-width="formLabelWidth">
-                                    <el-input v-model="form.roomNumber" autocomplete="off" />
-                                </el-form-item>
-                                <el-form-item label="所属楼栋" :label-width="formLabelWidth">
-                                    <!-- <el-input v-model="form.roomNumber" autocomplete="off" /> -->
-                                    <el-select v-model="form.Unit" value-key="id" placeholder="Please select activity area">
-                                        <!-- 遍历getUserResponse数组 -->
-                                        <el-option v-for="item in getUnitResponse" :key="item.id"
-                                            :label="item.buildingName + item.name" :value="item" />
-                                        <!-- <el-option label="Area1" value="shanghai" />
-                                    <el-option label="Area2" value="beijing" /> -->
-                                    </el-select>
-                                </el-form-item>
+                                <!-- <el-form-item label="房屋地址" :label-width="formLabelWidth">
+                                <el-input v-model="form.roomNumber" autocomplete="off" />
+                            </el-form-item> -->
                                 <!-- <el-form-item label="Area" :label-width="formLabelWidth">
                                 <el-select v-model="form.region" placeholder="Please select activity area">
                                     <el-option label="Area1" value="shanghai" />
@@ -333,25 +280,17 @@ const searchData = async () => {
                 </div>
             </div>
             <el-table :data="tableDataPage" style="width: 100%">
-                <!-- <el-table-column fixed prop="id" label="#" width="150" /> -->
-                <el-table-column fixed prop="address" label="隶属楼栋" width="150" />
-                <el-table-column prop="roomNumber" label="房间号" width="150" />
-                <el-table-column prop="elevator" label="是否为电梯房" width="150" />
-                <el-table-column prop="area" label="房屋大小" width="150" />
-                <el-table-column prop="live" label="房屋入住情况" width="150" />
-                <el-table-column prop="username" label="户主名称" width="150" />
-                <el-table-column prop="phone" label="户主电话" width="180" />
-                <el-table-column prop="name" label="房屋昵称" width="180" />
-                <el-table-column prop="type" label="房屋类型" width="180" />
-                <el-table-column prop="atTime" label="房屋到期时间" width="600" />
-                <el-table-column fixed="right" label="操作" min-width="220">
+                <el-table-column fixed prop="id" label="#" width="300" />
+                <el-table-column prop="name" label="楼栋号" width="400" />
+                <el-table-column prop="type" label="是否有电梯" width="600" />
+                <el-table-column fixed="right" label="操作" min-width="180">
                     <template #default="scope">
                         <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
                         </el-button> -->
-                        <el-button @click="moveUser(scope.row.id)" type="primary" size="small">移除户主</el-button>
-                        <el-button @click="router.push({ path: '/admin/updateHouse', query: { houseId: scope.row.id } })"
-                            type="primary" size="small">修改</el-button>
+                        <!-- <el-button @click="moveUser(scope.row.id)" type="primary" size="small">移除户主</el-button> -->
+                        <!-- <el-button @click="router.push({ path: '/admin/updateHouse', query: { houseId: scope.row.id } })"
+                            type="primary" size="small">修改</el-button> -->
                         <el-button @click="deleteHouse(scope.row.id)" type="primary" size="small">删除</el-button>
                     </template>
                 </el-table-column>
@@ -385,7 +324,7 @@ const searchData = async () => {
     align-items: center;
     justify-content: space-between;
 
-    height: 60px;
+    height: 50px;
     padding: 10px;
     border-bottom: solid 0.8px rgb(217, 207, 207);
 }

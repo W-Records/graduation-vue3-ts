@@ -12,8 +12,13 @@ import {
 import { onMounted } from 'vue'
 import { getBillListService, addBillService, deleteBillService } from '@/api/BillApi'
 import { getAllUserService } from '@/api/UserApi'
+import { getbilltypeService, addbilltypeService, deletebilltypeService } from '@/api/BillTypeApi'
 
 
+
+// 搜索框的单选项
+const radio1 = ref('name')
+const input2 = ref('')
 
 
 
@@ -56,6 +61,17 @@ const onClick = async () => {
     await addBillService(form);
     loading.value = false
     dialog.value = false
+
+
+    const response: any = await getBillListService();
+    console.log(response);
+    tableData.value = response;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
+
+
 }
 
 const handleClose = (done: any) => {
@@ -90,6 +106,7 @@ const cancelForm = () => {
 
 
 let getUserResponse: any = ref([]);
+let getbilltypeResponse: any = ref([]);
 
 
 
@@ -131,6 +148,11 @@ onMounted(async () => {
         getUserResponse.value = await getAllUserService();
         console.log(getUserResponse.value);
 
+        // 获取账单类型信息
+        getbilltypeResponse.value = await getbilltypeService();
+        console.log(getbilltypeResponse.value);
+
+
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
@@ -150,49 +172,110 @@ const deleteBill = async (id: any) => {
     tableData.value = response;
 }
 
+
+import { watch } from 'vue';
+// 监听账单类型变化
+watch(
+    () => form.name,
+    (newVal) => {
+        const selectedType = getbilltypeResponse.value.find((item: any) => item.name === newVal);
+        if (selectedType && selectedType.amount !== undefined) {
+            form.price = selectedType.amount.toString();
+        } else {
+            form.price = '';
+        }
+    },
+    { immediate: true } // 页面加载时自动执行一次
+);
+
+
+const searchData = async () => {
+    console.log(radio1.value);
+    console.log(input2.value);
+
+    const response: any = await getBillListService();
+    console.log(response);
+    // 我现在需要在response数组对象中过滤数据，radio1为过滤时的属性，input2为过滤时用户输入的内容
+    const responseFilter = response.filter((item: any) => {
+        if (radio1.value === "name") {
+            return item.name.includes(input2.value);
+        } else if (radio1.value === "username") {
+            return item.username.includes(input2.value);
+        } else if (radio1.value === "status") {
+            return item.status.includes(input2.value);
+        }
+    });
+    console.log(responseFilter);
+    tableData.value = responseFilter;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
+}
 </script>
 
 <template>
     <div class="admin-body-main-table">
         <div class="admin-body-main-table-content">
             <div class="admin-body-main-table-content-title">
-                <el-button @click="dialog = true" type="primary" :icon="Plus" circle />
-                <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
-                <el-drawer v-model="dialog" title="添加账单" :before-close="handleClose" direction="ltr" class="demo-drawer">
-                    <div class="demo-drawer__content">
-                        <el-form :model="form">
-                            <el-form-item label="账单名" :label-width="formLabelWidth">
-                                <el-input v-model="form.name" autocomplete="off" />
-                            </el-form-item>
-                            <el-form-item label="账单金额" :label-width="formLabelWidth">
-                                <el-input v-model="form.price" autocomplete="off" />
-                            </el-form-item>
-                            <el-form-item label="用户名" :label-width="formLabelWidth">
-                                <el-select v-model="form.user" value-key="id" placeholder="Please select activity area">
-                                    <!-- 遍历getUserResponse数组 -->
-                                    <el-option v-for="item in getUserResponse" :key="item.id" :label="item.username"
-                                        :value="item" />
-                                    <!-- <el-option label="Area1" value="shanghai" />
-                                    <el-option label="Area2" value="beijing" /> -->
-                                </el-select>
-                            </el-form-item>
-                        </el-form>
-                        <div class="demo-drawer__footer">
-                            <el-button @click="cancelForm">Cancel</el-button>
-                            <el-button type="primary" :loading="loading" @click="onClick">
-                                {{ loading ? 'Submitting ...' : 'Submit' }}
-                            </el-button>
+                <div>
+                    <div class="admin-body-main-table-content-title-search">
+                        <el-radio-group v-model="radio1" size="large" fill="#6cf">
+                            <el-radio-button label="账单名" value="name" />
+                            <el-radio-button label="用户名" value="username" />
+                            <el-radio-button label="账单状态" value="status" />
+                        </el-radio-group>
+                        <div style="margin-left: 40px">
+                            <el-input v-model="input2" style="width: 240px" placeholder="根据按钮选项搜索" :prefix-icon="Search" />
+                            <el-button @click="searchData()" style="margin-left: 6px" type="primary" round
+                                size="small">搜索</el-button>
                         </div>
                     </div>
-                </el-drawer>
+                </div>
+                <div>
+                    <el-button @click="dialog = true" type="primary" :icon="Plus" circle />
+                    <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
+                    <el-drawer v-model="dialog" title="添加账单" :before-close="handleClose" direction="ltr"
+                        class="demo-drawer">
+                        <div class="demo-drawer__content">
+                            <el-form :model="form">
+                                <el-form-item label="账单类型" :label-width="formLabelWidth">
+                                    <!-- <el-input v-model="form.name" autocomplete="off" /> -->
+                                    <el-select v-model="form.name" placeholder="">
+                                        <el-option v-for="item in getbilltypeResponse" :key="item.id" :label="item.name"
+                                            :value="item.name" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="具体金额" :label-width="formLabelWidth">
+                                    <el-input v-model="form.price" autocomplete="off" />
+                                </el-form-item>
+                                <el-form-item label="用户名" :label-width="formLabelWidth">
+                                    <el-select v-model="form.user" value-key="id" placeholder="Please select activity area">
+                                        <!-- 遍历getUserResponse数组 -->
+                                        <el-option v-for="item in getUserResponse" :key="item.id" :label="item.username"
+                                            :value="item" />
+                                        <!-- <el-option label="Area1" value="shanghai" />
+                                    <el-option label="Area2" value="beijing" /> -->
+                                    </el-select>
+                                </el-form-item>
+                            </el-form>
+                            <div class="demo-drawer__footer">
+                                <el-button @click="cancelForm">Cancel</el-button>
+                                <el-button type="primary" :loading="loading" @click="onClick">
+                                    {{ loading ? 'Submitting ...' : 'Submit' }}
+                                </el-button>
+                            </div>
+                        </div>
+                    </el-drawer>
+                </div>
             </div>
             <el-table :data="tableDataPage" style="width: 100%">
                 <el-table-column fixed prop="id" label="账单编号" width="230" />
                 <el-table-column prop="name" label="账单名" width="230" />
                 <el-table-column prop="price" label="账单价格" width="230" />
-                <el-table-column prop="username" label="用户名" width="230" />
+                <el-table-column prop="username" label="账单归属人" width="230" />
                 <el-table-column prop="status" label="账单状态" width="600" />
-                <el-table-column fixed="right" label="Operations" min-width="150">
+                <el-table-column fixed="right" label="操作" min-width="150">
                     <template #default="scope">
                         <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
@@ -210,6 +293,11 @@ const deleteBill = async (id: any) => {
 </template>
 
 <style scoped>
+.admin-body-main-table-content-title-search {
+    display: flex;
+    align-items: center;
+}
+
 .admin-body-main-table-pagination {
     display: flex;
     align-items: center;
@@ -223,9 +311,10 @@ const deleteBill = async (id: any) => {
 
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
+    justify-content: space-between;
 
-    height: 50px;
+    height: 60px;
     padding: 10px;
     border-bottom: solid 0.8px rgb(217, 207, 207);
 }

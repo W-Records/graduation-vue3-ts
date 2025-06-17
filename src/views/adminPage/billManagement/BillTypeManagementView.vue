@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
-const router = useRouter()
 import {
     Check,
     Delete,
@@ -12,11 +10,12 @@ import {
     Plus,
 } from '@element-plus/icons-vue'
 import { onMounted } from 'vue'
-import { getNoticeListService, addNoticeService, deleteNoticeService } from '@/api/NoticeApi'
-
+// import { getBillListService, addBillService, deleteBillService } from '@/api/BillApi'
+import { getAllUserService } from '@/api/UserApi'
+import { getbilltypeService, addbilltypeService, deletebilltypeService } from '@/api/BillTypeApi'
 
 // 搜索框的单选项
-const radio1 = ref('title')
+const radio1 = ref('name')
 const input2 = ref('')
 
 
@@ -42,16 +41,37 @@ const dialog = ref(false)
 const loading = ref(false)
 
 const form = reactive({
-    title: '',
-    content: '',
+    name: '',
+    amount: '',
+    price: "",
+    status: "未缴费",
+    user: {} as any,
+    userid: "",
+    username: "",
 })
 
 // 添加房屋信息
 const onClick = async () => {
     loading.value = true
-    await addNoticeService(form);
+    // await addBillService(form);
+    // form.userid = form.user.id
+    // form.username = form.user.username
+    console.log(form);
+    await addbilltypeService(form);
     loading.value = false
     dialog.value = false
+
+
+    const response: any = await getbilltypeService();
+    console.log(response);
+    tableData.value = response;
+
+
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
+
+
+
 }
 
 const handleClose = (done: any) => {
@@ -83,6 +103,12 @@ const cancelForm = () => {
 
 
 
+
+
+let getUserResponse: any = ref([]);
+
+
+
 // 分页
 import { computed } from 'vue';
 const currentPage = ref(1);
@@ -105,39 +131,43 @@ const handlePageChange = (page: any) => {
 };
 
 
-
-
 onMounted(async () => {
     try {
-        const response: any = await getNoticeListService();
+        const response: any = await getbilltypeService();
         console.log(response);
         tableData.value = response;
 
+
         len.value = tableData.value.length;
         total.value = tableData.value.length;
+
+
+
+        // 获取用户
+        getUserResponse.value = await getAllUserService();
+        console.log(getUserResponse.value);
+
     } catch (error) {
         console.error('获取房屋数据失败', error)
     }
 })
 
 
-const deleteNotice = async (id: any) => {
+const deleteBill = async (id: any) => {
     console.log(id);
-    await deleteNoticeService(id)
+    await deletebilltypeService(id);
     ElMessage({
         message: '删除成功',
         type: 'success',
     })
 
-
-    const response: any = await getNoticeListService();
+    const response: any = await getbilltypeService();
     console.log(response);
     tableData.value = response;
-}
 
 
-const pageChange = () => {
-    console.log('pageChange');
+    len.value = tableData.value.length;
+    total.value = tableData.value.length;
 }
 
 
@@ -145,15 +175,12 @@ const searchData = async () => {
     console.log(radio1.value);
     console.log(input2.value);
 
-    // const response: any = await getBillListService();
-    const response: any = await getNoticeListService();
-    console.log(response);
-
+    const response: any = await getbilltypeService();
     console.log(response);
     // 我现在需要在response数组对象中过滤数据，radio1为过滤时的属性，input2为过滤时用户输入的内容
     const responseFilter = response.filter((item: any) => {
-        if (radio1.value === "title") {
-            return item.title.includes(input2.value);
+        if (radio1.value === "name") {
+            return item.name.includes(input2.value);
         } else if (radio1.value === "username") {
             return item.username.includes(input2.value);
         } else if (radio1.value === "status") {
@@ -176,9 +203,7 @@ const searchData = async () => {
                 <div>
                     <div class="admin-body-main-table-content-title-search">
                         <el-radio-group v-model="radio1" size="large" fill="#6cf">
-                            <el-radio-button label="标题" value="title" />
-                            <!-- <el-radio-button label="用户名" value="username" /> -->
-                            <!-- <el-radio-button label="账单状态" value="status" /> -->
+                            <el-radio-button label="账单名" value="name" />
                         </el-radio-group>
                         <div style="margin-left: 40px">
                             <el-input v-model="input2" style="width: 240px" placeholder="根据按钮选项搜索" :prefix-icon="Search" />
@@ -190,22 +215,16 @@ const searchData = async () => {
                 <div>
                     <el-button @click="dialog = true" type="primary" :icon="Plus" circle />
                     <!-- <el-button text @click="dialog = true">Open Drawer with nested form</el-button> -->
-                    <el-drawer v-model="dialog" title="添加公告" :before-close="handleClose" direction="ltr"
+                    <el-drawer v-model="dialog" title="添加账单" :before-close="handleClose" direction="ltr"
                         class="demo-drawer">
                         <div class="demo-drawer__content">
                             <el-form :model="form">
-                                <el-form-item label="公告标题" :label-width="formLabelWidth">
-                                    <el-input v-model="form.title" autocomplete="off" />
+                                <el-form-item label="账单名" :label-width="formLabelWidth">
+                                    <el-input v-model="form.name" autocomplete="off" />
                                 </el-form-item>
-                                <el-form-item label="公告内容" :label-width="formLabelWidth">
-                                    <el-input v-model="form.content" autocomplete="off" />
+                                <el-form-item label="默认金额" :label-width="formLabelWidth">
+                                    <el-input v-model="form.amount" autocomplete="off" />
                                 </el-form-item>
-                                <!-- <el-form-item label="Area" :label-width="formLabelWidth">
-                                <el-select v-model="form.region" placeholder="Please select activity area">
-                                    <el-option label="Area1" value="shanghai" />
-                                    <el-option label="Area2" value="beijing" />
-                                </el-select>
-                            </el-form-item> -->
                             </el-form>
                             <div class="demo-drawer__footer">
                                 <el-button @click="cancelForm">Cancel</el-button>
@@ -218,20 +237,15 @@ const searchData = async () => {
                 </div>
             </div>
             <el-table :data="tableDataPage" style="width: 100%">
-                <el-table-column fixed prop="id" label="公告编号" width="200" />
-                <el-table-column prop="title" label="公告标题" width="300" />
-                <el-table-column prop="content" label="公告内容" width="400" />
-                <el-table-column prop="createTime" label="时间" width="400" />
-                <!-- <el-table-column prop="type" label="房屋类型" width="180" />
-                <el-table-column prop="atTime" label="房屋到期时间" width="600" /> -->
+                <el-table-column fixed prop="id" label="账单编号" width="360" />
+                <el-table-column prop="name" label="账单名" width="450" />
+                <el-table-column prop="amount" label="标准价格" width="600" />
                 <el-table-column fixed="right" label="操作" min-width="150">
                     <template #default="scope">
                         <!-- <el-button type="primary" size="small" @click="handleClick">
                             分配房屋并授权
                         </el-button> -->
-                        <el-button @click="router.push({ path: '/admin/updateNotice', query: { noticeId: scope.row.id } })"
-                            type="primary" size="small">修改</el-button>
-                        <el-button @click="deleteNotice(scope.row.id)" type="primary" size="small">删除</el-button>
+                        <el-button @click="deleteBill(scope.row.id)" type="primary" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>

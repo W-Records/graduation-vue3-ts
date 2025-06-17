@@ -94,7 +94,7 @@ onMounted(async () => {
                 <el-table-column fixed prop="ID" label="房屋编号" width="200" />
                 <el-table-column prop="name" label="房屋名称" width="200" />
                 <el-table-column prop="area" label="房屋大小" width="200" />
-                <el-table-column prop="roomNumber" label="房屋地址" width="200" />
+                <el-table-column prop="roomNumber" label="房间号" width="200" />
                 <el-table-column prop="type" label="类型" width="200" />
                 <el-table-column prop="atTime" label="到期时间" width="200" />
 

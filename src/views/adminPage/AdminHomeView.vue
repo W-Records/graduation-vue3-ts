@@ -63,27 +63,89 @@ const handleLogout = () => {
                         </RouterLink>
                     </el-menu-item>
 
-                    <el-menu-item index="13">
+                    <!-- <el-menu-item index="13">
                         <RouterLink to="/admin/carManagement" style="text-decoration: none;color: inherit;">
                             <el-icon><icon-menu /></el-icon>
                             <span>车辆管理</span>
                         </RouterLink>
-                    </el-menu-item>
+                    </el-menu-item> -->
+                    <el-sub-menu index="13">
+                        <template #title>
+                            <el-icon>
+                                <location />
+                            </el-icon>
+                            <span>车位管理</span>
+                        </template>
+                        <el-menu-item index="13-1">
+                            <RouterLink to="/admin/carManagement" style="text-decoration: none;color: inherit;">
+                                <span>普通车位</span>
+                            </RouterLink>
+                        </el-menu-item>
+                        <el-menu-item index="13-2">
+                            <RouterLink to="/admin/FireCarManagementView" style="text-decoration: none;color: inherit;">
+                                <span>消防车位</span>
+                            </RouterLink>
+                        </el-menu-item>
+                        <!-- <el-menu-item index="17-1">普通车位</el-menu-item>
+                        <el-menu-item index="17-2">消防车位</el-menu-item> -->
+                    </el-sub-menu>
 
-                    <el-menu-item index="12">
+                    <!-- <el-menu-item index="12">
                         <RouterLink to="/admin/HouseManagement" style="text-decoration: none;color: inherit;">
                             <el-icon><icon-menu /></el-icon>
                             <span>房屋管理</span>
                         </RouterLink>
-                    </el-menu-item>
+                    </el-menu-item> -->
+                    <el-sub-menu index="12">
+                        <template #title>
+                            <el-icon>
+                                <location />
+                            </el-icon>
+                            <span>房屋系统</span>
+                        </template>
+                        <el-menu-item index="12-1">
+                            <RouterLink to="/admin/buildingManagementView" style="text-decoration: none;color: inherit;">
+                                <span>楼栋管理</span>
+                            </RouterLink>
+                        </el-menu-item>
+                        <el-menu-item index="12-2">
+                            <RouterLink to="/admin/UnitManagementView" style="text-decoration: none;color: inherit;">
+                                <span>单元管理</span>
+                            </RouterLink>
+                        </el-menu-item>
+                        <el-menu-item index="12-3">
+                            <RouterLink to="/admin/HouseManagement" style="text-decoration: none;color: inherit;">
+                                <span>房屋管理</span>
+                            </RouterLink>
+                        </el-menu-item>
+                    </el-sub-menu>
 
 
-                    <el-menu-item index="14">
+                    <!-- <el-menu-item index="14">
                         <RouterLink to="/admin/BillManagement" style="text-decoration: none;color: inherit;">
                             <el-icon><icon-menu /></el-icon>
                             <span>用户账单</span>
                         </RouterLink>
-                    </el-menu-item>
+                    </el-menu-item> -->
+                    <el-sub-menu index="14">
+                        <template #title>
+                            <el-icon>
+                                <location />
+                            </el-icon>
+                            <span>账单系统</span>
+                        </template>
+                        <el-menu-item index="14-1">
+                            <RouterLink to="/admin/BillTypeManagementView" style="text-decoration: none;color: inherit;">
+                                <span>账单类型</span>
+                            </RouterLink>
+                        </el-menu-item>
+                        <el-menu-item index="14-2">
+                            <RouterLink to="/admin/BillManagement" style="text-decoration: none;color: inherit;">
+                                <span>用户账单</span>
+                            </RouterLink>
+                        </el-menu-item>
+                    </el-sub-menu>
+
 
                     <el-menu-item index="15">
                         <RouterLink to="/admin/RepairManagement" style="text-decoration: none;color: inherit;">
@@ -98,6 +160,17 @@ const handleLogout = () => {
                             <span>社区公告</span>
                         </RouterLink>
                     </el-menu-item>
+
+                    <!-- <el-sub-menu index="17">
+                        <template #title>
+                            <el-icon>
+                                <location />
+                            </el-icon>
+                            <span>车辆管理</span>
+                        </template>
+                        <el-menu-item index="17-1">普通车位</el-menu-item>
+                        <el-menu-item index="17-2">消防车位</el-menu-item>
+                    </el-sub-menu> -->
 
                     <!-- <el-sub-menu index="1">
                         <template #title>
@@ -117,8 +190,8 @@ const handleLogout = () => {
                             <template #title>item four</template>
                             <el-menu-item index="1-4-1">item one</el-menu-item>
                         </el-sub-menu>
-                    </el-sub-menu>
-                    <el-menu-item index="2">
+                    </el-sub-menu> -->
+                    <!-- <el-menu-item index="2">
                         <el-icon><icon-menu /></el-icon>
                         <span>Navigator Two</span>
                     </el-menu-item>

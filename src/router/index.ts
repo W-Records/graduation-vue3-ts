@@ -129,6 +129,26 @@ const router = createRouter({
           name: 'updateNotice',
           component: () => import('../views/adminPage/buttonform/noticeButton/updateNotice.vue'),
         },
+        {
+          path: 'FireCarManagementView',
+          name: 'FireCarManagementView',
+          component: () => import('../views/adminPage/carManagement/FireCarManagementView.vue'),
+        },
+        {
+          path: 'buildingManagementView',
+          name: 'buildingManagementView',
+          component: () => import('../views/adminPage/houseManagement/BuildingManagementView.vue'),
+        },
+        {
+          path: 'UnitManagementView',
+          name: 'UnitManagementView',
+          component: () => import('../views/adminPage/houseManagement/UnitManagementView.vue'),
+        },
+        {
+          path: 'BillTypeManagementView',
+          name: 'BillTypeManagementView',
+          component: () => import('../views/adminPage/billManagement/BillTypeManagementView.vue'),
+        },
       ],
     },
     {

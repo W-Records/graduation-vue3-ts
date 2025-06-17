@@ -154,9 +154,9 @@ const handleRegister = () => {
 <template>
     <div class="login-container">
 
-        <div class="logo-login">
+        <!-- <div class="logo-login">
             <img src="@/assets/loginbg1.465fc687.png" alt="logo">
-        </div>
+        </div> -->
 
         <el-card class="box-card">
             <div slot="header" class="header">
@@ -242,6 +242,11 @@ const handleRegister = () => {
     padding: 20px;
 
     /* border: solid; */
+    /* 来一个背景图片 */
+    background-image: url("../../assets/login33.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .logo-login {
@@ -257,7 +262,15 @@ const handleRegister = () => {
     border-radius: 20px;
     box-shadow: 0 20px 30px 0 rgba(20, 112, 177, 0.1);
 
+    margin-bottom: 100px;
+
     /* border: solid; */
+
+    /* 背景透明 */
+    background-color: rgba(255, 255, 255, 0.8);
+    /* 半透明白色背景 */
+    /* backdrop-filter: blur(6px); */
+    /* 模糊效果 */
 }
 
 .header {
